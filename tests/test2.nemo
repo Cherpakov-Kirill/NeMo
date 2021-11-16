@@ -1,0 +1,6 @@
+VAR y : INT;
+VAR x : INT;
+(
+   y := -1;
+   x := (y + (x+5))
+)

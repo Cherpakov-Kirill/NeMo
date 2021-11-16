@@ -1,0 +1,36 @@
+program = sp declaration*:d sp programBody:b sp                    {Program(:d, :b)};
+declaration = "VAR" sp variableName:n sp ":" sp variableType:t ";" sp         {Variable(:n, :t)};
+
+
+
+variableType = int | array;
+int = "INT" sp                      {Int()};
+array = "[" variableType:t "]" sp   {Array(:t)};
+
+programBody = assign | test | sequence | choice | loop | print | ifelse | while;
+assign = sp variableName:name sp ":=" sp expression:expr sp                               {Assign(:name, :expr)};
+test = sp "(" sp expression:left sp condition$cond sp expression:right sp ")?" sp       {Test($cond, :left, :right)};
+sequence = sp "(" programBody:body sequenceBody*:arrBodies ")" sp                       {makeSequence(:body, :arrBodies)};
+    sequenceBody = ";" sp programBody;
+choice = sp "(" programBody:body choiseBody*:arrBodies ")" sp                           {makeChoise(:body, :arrBodies)}; 
+    choiseBody = "U" sp programBody;
+loop = sp "(" sp programBody:body sp ")" "*" sp                                         {Loop(:body)};
+print = sp "print" "(" sp expression:expr sp ")" sp                                     {Print(:expr)};
+ifelse = sp "if" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "{" sp programBody:ifBody sp "}" sp  "else" sp "{" sp programBody:elseBody sp "}" {makeIfElse(:left, $cond, :right, :ifBody, :elseBody)};
+while  = sp "while" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "{" sp programBody:body sp "}" sp {makeWhile(:left, $cond, :right, :body)};
+
+expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | varExpr | minusInt | intExpr;
+mathOpExpr = "(" sp expression:l ("+"|"*"|"/"|"-"|"%")$o sp expression:r ")" sp                             {MathOpExpr($o, :l, :r)};
+arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {ArSetValExpr(:arr, :index, :var)};
+arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {ArGetValExpr(:arr, :index)};
+arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                                                         {ArLenValExpr(:arr)};
+varExpr = sp letter+$l sp                                                                                   {VarExpr($l)};
+minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusInt(s2i(:v))};
+intExpr = sp digit+$v sp                                                                                    {IntExpr(s2i(:v))};
+
+condition   = "!=" | "==" | "<=" | ">=" | "<" | ">" ;
+
+sp = (' ' | '\t' | '\n' | '\r')*;
+variableName = letter+$s {$s};
+letter = 'a'-'z';
+digit  = '0'-'9';

@@ -1,0 +1,104 @@
+import runtime;
+import lingo/pegcode/driver;
+
+export {
+    Program(declarations : [Variable], body : Body);
+
+    Body ::= Assign, Test, Sequence, Choice, Loop, Print;
+    Assign(var: string, value: Expression); ///var := expr
+    Test(operation: string, l: Expression, r: Expression);
+    Sequence(bodies: [Body]);               ///(body1;body2)
+    Choice(bodies: [Body]);                 ///(body1 U body2)
+    Loop(body: Body);                       ///(body*)
+    Print(expr: Expression);                ///PRINT(expr)
+
+    Variable(name : string, type : Type);
+
+    Type ::= Int, Array;
+    Int();
+    Array(type : Type);
+
+    Expression ::= MathOpExpr, ArSetValExpr, ArGetValExpr, ArLenExpr, VarExpr, IntExpr;
+    MathOpExpr(operation: string, l: Expression, r: Expression);
+    ArSetValExpr(array: VarExpr, index: Expression, value: Expression);
+    ArGetValExpr(array: VarExpr, index: Expression);
+    ArLenExpr(array: VarExpr);
+    VarExpr(name: string);
+    IntExpr(value: int);
+
+    str2program(program: string) -> Maybe<Program>;
+}
+
+makeSequence(bodies: [flow]) -> Sequence{
+    Sequence(concat([bodies[0]], bodies[1]));
+}
+
+makeChoise(bodies: [flow]) -> Choice{
+    Choice(concat([bodies[0]], bodies[1]));
+}
+
+reverseCondition(cond : string) -> string{
+    if(cond == "==") {
+         "!=";
+      }else if(cond == "!=") {
+         "==";
+      }else if(cond == "<=") {
+         ">";
+      }else if(cond == ">="){
+         "<";
+      }else if(cond == "<") {
+         ">=";
+      }else if(cond == ">") {
+         "<=";
+      }else {
+         "";
+      }
+}
+
+makeIfElse(bodies: [flow]) -> Choice{
+    leftExpr = bodies[0];
+    cond = bodies[1];
+    rightExpr = bodies[2]; 
+    ifBody = bodies[3]; 
+    elseBody = bodies[4];
+    Choice([
+        Sequence([Test(cond, leftExpr, rightExpr), ifBody]),
+        Sequence([Test(reverseCondition(cond), leftExpr, rightExpr), ifBody])
+    ]);
+}
+
+makeWhile(bodies: [flow]) -> Sequence{
+    leftExpr = bodies[0];
+    cond = bodies[1];
+    rightExpr = bodies[2]; 
+    body = bodies[3];
+    Sequence([
+        Loop(Sequence([Test(cond, leftExpr, rightExpr), body])),
+        Test(reverseCondition(cond), leftExpr, rightExpr)
+    ]);
+}
+
+makeMinusInt(bodies: [flow]){
+    val = bodies[0];
+    IntExpr(val*(-1));
+}
+
+str2program(program: string) -> Maybe<Program> {
+    treeSequence = setTree(defaultPegActions.t, "makeSequence", makeSequence);
+    treeChoice = setTree(treeSequence, "makeChoise", makeChoise);
+    treeIf = setTree(treeChoice, "makeIfElse", makeIfElse);
+    treeWhile = setTree(treeIf, "makeWhile", makeWhile);
+    fullThree = setTree(treeWhile, "makeMinusInt", makeMinusInt);
+    pegActions = SemanticActions(fullThree);
+    grammar = "#include nemo.lingo";
+    ret = parsic3(compilePegGrammar(grammar), program, pegActions, Program([],Print(IntExpr(0))));
+    if(ret.third==""){
+        Some(ret.first);
+    }else{
+        None();
+    }
+}
+
+/*program2str(prog : Program) -> string{
+
+}*/

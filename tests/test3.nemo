@@ -1,0 +1,6 @@
+VAR x : INT;
+(
+   x := 1;
+   ((PRINT(x); x := 2) U (PRINT(x); x := 3) U (PRINT(x); x := 4));
+   PRINT(x)
+)  

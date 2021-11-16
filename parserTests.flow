@@ -1,0 +1,24 @@
+import runtime;
+import nemo;
+
+launchTest(file : string){
+    println("TestFile: " + file);
+    testCode = getFileContent(file);
+    println(testCode);
+    switch (str2program(testCode) : Maybe<Program>) {
+        Some(prog):{
+            println(prog);
+        }
+        None():{
+            println("None");     
+        }
+    }
+}
+
+main(){
+    //launchTest("./tests/test1.nemo");
+    //launchTest("./tests/test2.nemo");
+    //launchTest("./tests/test3.nemo");
+    //launchTest("./tests/test4.nemo");
+    launchTest("./tests/test5.nemo");
+}
