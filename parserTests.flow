@@ -1,5 +1,5 @@
 import runtime;
-import nemo;
+import NeMo/nemo;
 
 launchTest(file : string){
     println("TestFile: " + file);

@@ -90,7 +90,7 @@ str2program(program: string) -> Maybe<Program> {
     treeWhile = setTree(treeIf, "makeWhile", makeWhile);
     fullThree = setTree(treeWhile, "makeMinusInt", makeMinusInt);
     pegActions = SemanticActions(fullThree);
-    grammar = "#include nemo.lingo";
+    grammar = "#include NeMo/nemo.lingo";
     ret = parsic3(compilePegGrammar(grammar), program, pegActions, Program([],Print(IntExpr(0))));
     if(ret.third==""){
         Some(ret.first);
@@ -99,7 +99,3 @@ str2program(program: string) -> Maybe<Program> {
     }
 }
 
-/*program2str(prog : Program) -> string{
-
-
-}*/
