@@ -1,0 +1,8 @@
+VAR array : [INT];
+VAR arrsize : INT;
+VAR i : INT;
+(i := 1; arrsize := 10; (*(((i <= arrsize)?; (array := (set(array, i, (i * 10))); i := (i + 1))
+)
+)
+; (i > arrsize)?)
+; print(array))

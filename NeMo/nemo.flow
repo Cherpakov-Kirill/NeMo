@@ -5,12 +5,12 @@ export {
     Program(declarations : [Variable], body : Body);
 
     Body ::= Assign, Test, Sequence, Choice, Loop, Print;
-    Assign(var: string, value: Expression); ///var := expr
-    Test(operation: string, l: Expression, r: Expression);
-    Sequence(bodies: [Body]);               ///(body1;body2)
-    Choice(bodies: [Body]);                 ///(body1 U body2)
-    Loop(body: Body);                       ///(body*)
-    Print(expr: Expression);                ///PRINT(expr)
+    Assign(var: string, value: Expression);                 ///var := expr
+    Test(operation: string, l: Expression, r: Expression);  ///(body)?
+    Sequence(bodies: [Body]);                               ///(body1;body2)
+    Choice(bodies: [Body]);                                 ///(body1 U body2)
+    Loop(body: Body);                                       ///(body)*
+    Print(expr: Expression);                                ///print(expr)
 
     Variable(name : string, type : Type);
 
@@ -27,6 +27,7 @@ export {
     IntExpr(value: int);
 
     str2program(program: string) -> Maybe<Program>;
+    program2str(program: Program) -> string;
 }
 
 makeSequence(bodies: [flow]) -> Sequence{
@@ -99,3 +100,84 @@ str2program(program: string) -> Maybe<Program> {
     }
 }
 
+program2str(program: Program) -> string{
+    declarations = variables2str(program.declarations);
+    progBody = progBody2str(program.body);
+    declarations + progBody;
+}
+
+variables2str(vars : [Variable]) -> string {
+    variableStrings = map(vars, variable2str);
+    concatStrings(variableStrings);
+}
+
+variable2str(var : Variable) -> string {
+    nameStr = var.name;
+    typeStr = type2str(var.type);
+    "VAR " + nameStr + " : " + typeStr + ";\n";
+}
+
+type2str(type: Type) -> string{
+    switch (type : Type) {
+        Int(): {
+            "INT";
+        }
+        Array(t): {
+            "[" + type2str(t) + "]";
+        }
+    }
+}
+
+addEndOfLine(str : string) -> string{
+    if(strlen(str)>30){
+        str + "\n";
+    } else {
+        str;
+    }
+}
+
+progBody2str(body : Body) -> string {
+    switch (body) {
+        Assign(var, value): {
+            var + " := " + expression2str(value);
+        }
+        Test(operation, leftExpr, rightExpr): {
+            addEndOfLine("(" + expression2str(leftExpr) + " " + operation + " " + expression2str(rightExpr) + ")?");
+        }
+        Sequence(bodies): {
+            addEndOfLine("(" + rtrim2(fold(bodies, "", \acc, body_i -> acc + progBody2str(body_i) + "; "),"; ") + ")");
+        }             
+        Choice(bodies): {
+            addEndOfLine("(" + rtrim2(fold(bodies, "", \acc, body_i -> acc + progBody2str(body_i) + " U ")," U ") + ")");
+        }                
+        Loop(progBody): {
+            addEndOfLine("*(" + progBody2str(progBody) + ")");
+        }                       
+        Print(expr): {
+            addEndOfLine("print(" + expression2str(expr) + ")");
+        }
+    }
+}
+
+expression2str(expr : Expression) -> string {
+    switch (expr) {
+        MathOpExpr(operation, l, r): {
+            "(" + expression2str(l) + " " + operation + " " + expression2str(r) + ")";
+        }
+        ArSetValExpr(array, index, value): {
+            "(set(" + expression2str(array) + ", " + expression2str(index) + ", " + expression2str(value) + "))";
+        }
+        ArGetValExpr(array, index): {
+            "(get(" + expression2str(array) + ", " + expression2str(index) + "))";
+        }
+        ArLenExpr(array): {
+            "(get(" + expression2str(array) + "))";
+        }
+        VarExpr(name): {
+            name;
+        }
+        IntExpr(value): {
+            i2s(value);
+        }
+    }
+}

@@ -1,24 +1,54 @@
 import runtime;
 import NeMo/nemo;
 
-launchTest(file : string){
-    println("TestFile: " + file);
-    testCode = getFileContent(file);
+launchTest(filename : string){
+    fileIn = "./tests/testsIn/" + filename;
+    println("TestFile: " + fileIn);
+    testCode = getFileContent(fileIn);
     println(testCode);
     switch (str2program(testCode) : Maybe<Program>) {
         Some(prog):{
+            println("str2program(fileContent : string)");
             println(prog);
+            println("");
+            println("program2str(NeMoProg : Program)");
+            progStr = program2str(prog);
+            println(progStr);
+            println("");
+            if(setFileContent("./tests/testsOut/" + "program2str_"+filename, progStr)){
+                println("File was created");
+            }
+            else{
+                println("File was not created");
+            }
+            println("");
+            switch (str2program(progStr) : Maybe<Program>) {
+                Some(prog2):{
+                    println("str2program(programFromNeMo2str)");
+                    println(prog2);
+                    println("");
+                    if(prog == prog2) {
+                        println("Seccessful: NeMo -> string -> NeMo");
+                    }
+                    else {
+                        println("Error: NeMo -> string -> NeMo");
+                    }
+                }
+                None():{
+                    println("ParserError: " + filename + " -> NeMo -> string -> NeMo");     
+                }
+            }
         }
         None():{
-            println("None");     
+            println("ParserError: " + filename + " -> NeMo");     
         }
     }
 }
 
 main(){
-    //launchTest("./tests/test1.nemo");
-    //launchTest("./tests/test2.nemo");
-    //launchTest("./tests/test3.nemo");
-    //launchTest("./tests/test4.nemo");
-    launchTest("./tests/test5.nemo");
+    //launchTest("test1.nemo");
+    //launchTest("test2.nemo");
+    //launchTest("test3.nemo");
+    //launchTest("test4.nemo");
+    launchTest("test5.nemo");
 }
