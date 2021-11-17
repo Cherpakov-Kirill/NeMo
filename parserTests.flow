@@ -19,6 +19,6 @@ main(){
     //launchTest("./tests/test1.nemo");
     //launchTest("./tests/test2.nemo");
     //launchTest("./tests/test3.nemo");
-    //launchTest("./tests/test4.nemo");
+    launchTest("./tests/test4.nemo");
     launchTest("./tests/test5.nemo");
 }
