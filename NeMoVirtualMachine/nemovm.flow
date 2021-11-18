@@ -1,0 +1,25 @@
+
+export{
+    VMProgram(declarations : [VMVariable], instructions : [VMInstruction]);
+
+    VMInstruction(label : int, body : VMBody);
+
+    VMBody ::= VMAssign, VMTest, VMPrint;
+    VMAssign(var: string, value: Expression, goto : [int]);                 ///var := expr
+    VMTest(operation: string, l: Expression, r: Expression, iflabel : [int], elselabel : [int]);  ///(body)?
+    VMPrint(expr: Expression, goto : [int]);                                ///print(expr)
+
+    VMVariable(name : string, type : VMType);
+
+    VMType ::= VMInt, VMArray;
+    VMInt();
+    VMArray(type : VMType);
+
+    VMExpression ::= VMMathOpExpr, VMArSetValExpr, VMArGetValExpr, VMArLenExpr, VMVarExpr, VMIntExpr;
+    MathOpExpr(operation: string, l: VMExpression, r: VMExpression);
+    ArSetValExpr(array: VMVarExpr, index: VMExpression, value: VMExpression);
+    VMArGetValExpr(array: VMVarExpr, index: VMExpression);
+    VMArLenExpr(array: VMVarExpr);
+    VMVarExpr(name: string);
+    VMIntExpr(value: int);
+}
