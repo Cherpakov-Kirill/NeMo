@@ -79,7 +79,7 @@ makeWhile(bodies: [flow]) -> Sequence{
     ]);
 }
 
-makeMinusInt(bodies: [flow]){
+makeMinusInt(bodies: [flow]) -> IntExpr{
     val = bodies[0];
     IntExpr(val*(-1));
 }
