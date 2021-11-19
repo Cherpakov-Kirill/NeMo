@@ -25,7 +25,8 @@ export{
     VMVarExpr(name: string);
     VMIntExpr(value: int);
 
-    vmstr2vmprogram(program : string) -> Maybe<VMProgram>;
+    str2vmprogram(program : string) -> Maybe<VMProgram>;
+    vmprogram2str(program: VMProgram) -> string;
 }
 
 makeLabelsArray(labels: [flow]) -> [int]{
@@ -37,7 +38,7 @@ makeMinusInt(bodies: [flow]) -> VMIntExpr{
     VMIntExpr(val*(-1));
 }
 
-vmstr2vmprogram(program : string) -> Maybe<VMProgram> {
+str2vmprogram(program : string) -> Maybe<VMProgram> {
     treeLabels = setTree(defaultPegActions.t, "makeLabelsArray", makeLabelsArray);
     fullThree = setTree(treeLabels, "makeMinusInt", makeMinusInt);
     pegActions = SemanticActions(fullThree);
@@ -50,3 +51,80 @@ vmstr2vmprogram(program : string) -> Maybe<VMProgram> {
     }
 }
 
+vmprogram2str(program: VMProgram) -> string{
+    declarations = vmvariables2str(program.declarations);
+    instructions = vminstructions2str(program.instructions);
+    declarations + instructions;
+}
+
+vmvariables2str(vars : [VMVariable]) -> string {
+    variableStrings = map(vars, vmvariable2str);
+    concatStrings(variableStrings);
+}
+
+vmvariable2str(var : VMVariable) -> string {
+    nameStr = var.name;
+    typeStr = vmtype2str(var.type);
+    "VAR " + nameStr + " : " + typeStr + ";\n";
+}
+
+vmtype2str(type: VMType) -> string{
+    switch (type : VMType) {
+        VMInt(): {
+            "INT";
+        }
+        VMArray(t): {
+            "[" + vmtype2str(t) + "]";
+        }
+    }
+}
+
+vminstructions2str(instructions : [VMInstruction]) -> string{
+    instructionStrings = map(instructions, vminstruction2str);
+    concatStrings(instructionStrings);
+}
+
+vminstruction2str(instruction : VMInstruction) -> string{
+    i2s(instruction.label) + ": " + vmprogBody2str(instruction.body);
+}
+
+array2str(arr : [int]) -> string{
+    "{" + rtrim2(fold(arr, "", \acc, elem_i -> acc + i2s(elem_i) + ", "), ", ") + "}";
+}
+
+vmprogBody2str(body : VMBody) -> string {
+    switch (body) {
+        VMAssign(var, value, goto): {
+            var + " := " + vmexpression2str(value) + " goto " + array2str(goto) + "\n";
+        }
+        VMTest(operation, leftExpr, rightExpr, ifLabels, elseLabels): {
+            "if (" + vmexpression2str(leftExpr) + " " + operation + " " + vmexpression2str(rightExpr) + ") then " + array2str(ifLabels) + " else " + array2str(elseLabels) + "\n";
+        }         
+        VMPrint(expr, goto): {
+            "print(" + vmexpression2str(expr) + ") goto " + array2str(goto) + "\n";
+        }
+    }
+}
+
+vmexpression2str(expr : VMExpression) -> string {
+    switch (expr) {
+        VMMathOpExpr(operation, l, r): {
+            "(" + vmexpression2str(l) + " " + operation + " " + vmexpression2str(r) + ")";
+        }
+        VMArSetValExpr(array, index, value): {
+            "(set(" + vmexpression2str(array) + ", " + vmexpression2str(index) + ", " + vmexpression2str(value) + "))";
+        }
+        VMArGetValExpr(array, index): {
+            "(get(" + vmexpression2str(array) + ", " + vmexpression2str(index) + "))";
+        }
+        VMArLenExpr(array): {
+            "(len(" + vmexpression2str(array) + "))";
+        }
+        VMVarExpr(name): {
+            name;
+        }
+        VMIntExpr(value): {
+            i2s(value);
+        }
+    }
+}

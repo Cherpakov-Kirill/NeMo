@@ -6,48 +6,48 @@ launchTest(filename : string){
     println("TestFile: " + fileIn);
     testCode = getFileContent(fileIn);
     println(testCode);
-    switch (vmstr2vmprogram(testCode) : Maybe<VMProgram>) {
+    switch (str2vmprogram(testCode) : Maybe<VMProgram>) {
         Some(prog):{
-            println("vmstr2vmprogram(fileContent : string)");
+            println("str2vmprogram(fileContent : string)");
             println(prog);
-            /*println("");
-            println("program2str(NeMoProg : Program)");
-            progStr = program2str(prog);
+            println("");
+            println("vmprogram2str(VMNeMoProg : Program)");
+            progStr = vmprogram2str(prog);
             println(progStr);
             println("");
-            if(setFileContent("./tests/testsOut/" + "program2str_"+filename, progStr)){
+            if(setFileContent("./tests/testsOut/" + "vmprogram2str_"+filename, progStr)){
                 println("File was created");
             }
             else{
                 println("File was not created");
             }
             println("");
-            switch (str2program(progStr) : Maybe<Program>) {
+            switch (str2vmprogram(progStr) : Maybe<VMProgram>) {
                 Some(prog2):{
-                    println("str2program(programFromNeMo2str)");
+                    println("str2vmprogram(programFromNeMoVM2str)");
                     println(prog2);
                     println("");
                     if(prog == prog2) {
-                        println("Seccessful: NeMo -> string -> NeMo");
+                        println("Seccessful: NeMoVM -> string -> NeMoVM");
                     }
                     else {
-                        println("Error: NeMo -> string -> NeMo");
+                        println("Error: NeMoVM -> string -> NeMoVM");
                     }
                 }
                 None():{
-                    println("ParserError: " + filename + " -> NeMo -> string -> NeMo");     
+                    println("ParserError: NeMoVM -> string -> NeMoVM");     
                 }
-            }*/
+            }
         }
         None():{
-            println("ParserError: " + filename + " -> VMNeMo");     
+            println("ParserError: " + filename + " -> NeMoVM");     
         }
     }
 }
 
 main(){
-    //launchTest("test1.vmnemo");
-    launchTest("test2.vmnemo");
+    launchTest("test1.vmnemo");
+    //launchTest("test2.vmnemo");
     //launchTest("test3.vmnemo");
     //launchTest("test4.vmnemo");
     //launchTest("test5.vmnemo");

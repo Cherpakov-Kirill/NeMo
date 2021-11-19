@@ -1,0 +1,11 @@
+VAR val : INT;
+VAR array : [INT];
+0: array := (set(array, 0, 1)) goto {1}
+1: array := (set(array, 1, 585)) goto {2}
+2: array := (set(array, 2, 58878)) goto {3}
+3: array := (set(array, 3, 857857)) goto {4}
+4: val := (get(array, 0)) goto {5}
+5: if (val < 5) then {6} else {7}
+6: val := 5 goto {8}
+7: val := (get(array, 1)) goto {8}
+8: print(val) goto {9}
