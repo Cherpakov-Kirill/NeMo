@@ -13,8 +13,8 @@ test = sp "if" sp "(" sp expression:left sp condition$cond sp expression:right s
 print = sp "print" "(" sp expression:expr sp ")" sp "goto" sp "{" sp intArray:labelsArray sp "}" sp                                     {VMPrint(:expr, :labelsArray)};
 
 
-intArray = digit+$l labelNumbers*:arrLabels     {makeLabelsArray($l, :arrLabels)};
-    labelNumbers = "," sp digit+;
+intArray = digit+$l labelNumbers*:arrLabels     {makeLabelsArray(s2i($l), :arrLabels)};
+    labelNumbers = "," sp digit+$l {s2i($l)};
 
 expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | varExpr | minusInt | intExpr;
 mathOpExpr = "(" sp expression:l ("+"|"*"|"/"|"-"|"%")$o sp expression:r ")" sp                             {VMMathOpExpr($o, :l, :r)};
