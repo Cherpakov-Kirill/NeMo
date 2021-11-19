@@ -1,3 +1,5 @@
+import runtime;
+import lingo/pegcode/driver;
 
 export{
     VMProgram(declarations : [VMVariable], instructions : [VMInstruction]);
@@ -5,9 +7,9 @@ export{
     VMInstruction(label : int, body : VMBody);
 
     VMBody ::= VMAssign, VMTest, VMPrint;
-    VMAssign(var: string, value: Expression, goto : [int]);                 ///var := expr
-    VMTest(operation: string, l: Expression, r: Expression, iflabel : [int], elselabel : [int]);  ///(body)?
-    VMPrint(expr: Expression, goto : [int]);                                ///print(expr)
+    VMAssign(var: string, value: VMExpression, goto : [int]);                 ///var := expr
+    VMTest(operation: string, l: VMExpression, r: VMExpression, iflabel : [int], elselabel : [int]);  ///(body)?
+    VMPrint(expr: VMExpression, goto : [int]);                                ///print(expr)
 
     VMVariable(name : string, type : VMType);
 
@@ -16,16 +18,18 @@ export{
     VMArray(type : VMType);
 
     VMExpression ::= VMMathOpExpr, VMArSetValExpr, VMArGetValExpr, VMArLenExpr, VMVarExpr, VMIntExpr;
-    MathOpExpr(operation: string, l: VMExpression, r: VMExpression);
-    ArSetValExpr(array: VMVarExpr, index: VMExpression, value: VMExpression);
+    VMMathOpExpr(operation: string, l: VMExpression, r: VMExpression);
+    VMArSetValExpr(array: VMVarExpr, index: VMExpression, value: VMExpression);
     VMArGetValExpr(array: VMVarExpr, index: VMExpression);
     VMArLenExpr(array: VMVarExpr);
     VMVarExpr(name: string);
     VMIntExpr(value: int);
+
+    vmstr2vmprogram(program : string) -> Maybe<VMProgram>;
 }
 
 makeLabelsArray(labels: [flow]) -> [int]{
-    concat([bodies[0]], bodies[1]);
+    concat([labels[0]], labels[1]);
 }
 
 makeMinusInt(bodies: [flow]) -> VMIntExpr{
@@ -35,13 +39,14 @@ makeMinusInt(bodies: [flow]) -> VMIntExpr{
 
 vmstr2vmprogram(program : string) -> Maybe<VMProgram> {
     treeLabels = setTree(defaultPegActions.t, "makeLabelsArray", makeLabelsArray);
-    fullThree = setTree(treeWhile, "makeMinusInt", makeMinusInt);
+    fullThree = setTree(treeLabels, "makeMinusInt", makeMinusInt);
     pegActions = SemanticActions(fullThree);
     grammar = "#include NeMoVirtualMachine/nemovm.lingo";
-    ret = parsic3(compilePegGrammar(grammar), program, pegActions, VMProgram([],VMPrint(VMIntExpr(0))));
+    ret = parsic3(compilePegGrammar(grammar), program, pegActions, VMProgram([],[VMInstruction(0,VMPrint(VMIntExpr(0),[]))]));
     if(ret.third==""){
         Some(ret.first);
     }else{
         None();
     }
 }
+

@@ -1,29 +1,29 @@
-program = sp declaration*:d sp instuction*:b sp                             {VMProgram(:d, :b)};
+program = sp declaration*:d sp instruction*:b sp                             {VMProgram(:d, :b)};
 declaration = "VAR" sp variableName:n sp ":" sp variableType:t ";" sp       {VMVariable(:n, :t)};
-instruction = sp digit+$v sp ":" sp programBody:b sp                        {VMInstruction($v, :b)};
+instruction = sp digit+ $v sp ":" sp programBody:b sp                        {VMInstruction(s2i($v), :b)};
 
 
 variableType = int | array;
-int = "INT" sp                      {Int()};
-array = "[" variableType:t "]" sp   {Array(:t)};
+int = "INT" sp                      {VMInt()};
+array = "[" variableType:t "]" sp   {VMArray(:t)};
 
 programBody = assign | test | print;
-assign = sp variableName:name sp ":=" sp expression:expr sp "goto" sp "{" sp intArray:labelsArray sp "}" sp {Assign(:name, :expr, :labelsArray)};
-test = sp "if" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "then" sp "{" sp intArray:ifLabelsArray sp "}" sp "else" sp "{" sp intArray:elseLabelsArray sp "}" sp      {Test($cond, :left, :right, :ifLabelsArray, :elseLabelsArray)};
-print = sp "print" "(" sp expression:expr sp ")" sp "goto" sp "{" sp intArray:labelsArray sp "}" sp                                     {Print(:expr, :labelsArray)};
+assign = sp variableName:name sp ":=" sp expression:expr sp "goto" sp "{" sp intArray:labelsArray sp "}" sp {VMAssign(:name, :expr, :labelsArray)};
+test = sp "if" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "then" sp "{" sp intArray:ifLabelsArray sp "}" sp "else" sp "{" sp intArray:elseLabelsArray sp "}" sp      {VMTest($cond, :left, :right, :ifLabelsArray, :elseLabelsArray)};
+print = sp "print" "(" sp expression:expr sp ")" sp "goto" sp "{" sp intArray:labelsArray sp "}" sp                                     {VMPrint(:expr, :labelsArray)};
 
 
-intArray = "[" digit+$l labelNumbers*:arrLabels "]"     {makeLabelsArray($l, :arrLabels)};
+intArray = digit+$l labelNumbers*:arrLabels     {makeLabelsArray($l, :arrLabels)};
     labelNumbers = "," sp digit+;
 
 expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | varExpr | minusInt | intExpr;
-mathOpExpr = "(" sp expression:l ("+"|"*"|"/"|"-"|"%")$o sp expression:r ")" sp                             {MathOpExpr($o, :l, :r)};
-arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {ArSetValExpr(:arr, :index, :var)};
-arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {ArGetValExpr(:arr, :index)};
-arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                                                         {ArLenValExpr(:arr)};
-varExpr = sp letter+$l sp                                                                                   {VarExpr($l)};
+mathOpExpr = "(" sp expression:l ("+"|"*"|"/"|"-"|"%")$o sp expression:r ")" sp                             {VMMathOpExpr($o, :l, :r)};
+arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {VMArSetValExpr(:arr, :index, :var)};
+arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {VMArGetValExpr(:arr, :index)};
+arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                                                         {VMArLenValExpr(:arr)};
+varExpr = sp letter+$l sp                                                                                   {VMVarExpr($l)};
 minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusInt(s2i(:v))};
-intExpr = sp digit+$v sp                                                                                    {IntExpr(s2i(:v))};
+intExpr = sp digit+$v sp                                                                                    {VMIntExpr(s2i(:v))};
 
 condition   = "!=" | "==" | "<=" | ">=" | "<" | ">" ;
 
