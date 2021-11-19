@@ -35,7 +35,7 @@ launchTest(filename : string){
                     }
                 }
                 None():{
-                    println("ParserError: " + filename + " -> NeMo -> string -> NeMo");     
+                    println("ParserError: NeMo -> string -> NeMo");     
                 }
             }
         }
