@@ -1,6 +1,11 @@
 import runtime;
 import NeMo/nemo;
 
+export {
+    launchNemoTest(filename : string) -> Program;
+}
+
+
 getCode(fileIn : string) -> string{
     println("Read test file: " + fileIn);
     testCode = getFileContent(fileIn);
