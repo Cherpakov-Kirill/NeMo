@@ -1,0 +1,23 @@
+import runtime;
+
+export {
+    getCode(fileIn : string) -> string;
+    putCode(fileOut : string, code : string) -> void;
+}
+
+
+getCode(fileIn : string) -> string{
+    println("Read test file: " + fileIn);
+    testCode = getFileContent(fileIn);
+    println(testCode);
+    println("");
+    testCode;
+}
+
+putCode(fileOut : string, code : string) -> void{
+    if(setFileContent(fileOut, code)){
+        println("File was created");
+    }else{
+        println("File was not created");
+    }
+}

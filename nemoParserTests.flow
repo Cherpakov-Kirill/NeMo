@@ -1,17 +1,9 @@
 import runtime;
 import NeMo/nemo;
+import fileUtils;
 
 export {
     launchNemoTest(filename : string) -> Program;
-}
-
-
-getCode(fileIn : string) -> string{
-    println("Read test file: " + fileIn);
-    testCode = getFileContent(fileIn);
-    println(testCode);
-    println("");
-    testCode;
 }
 
 parseNemoProgram(code : string, testTitle : string) -> Program{
@@ -36,11 +28,7 @@ program2str2program(prog : Program, testTitle : string, filename : string) -> Pr
     progStr = program2str(prog);
     println(progStr);
     println("");
-    if(setFileContent("./tests/testsOut/" + "program2str_" + filename, progStr)){
-        println("File was created");
-    }else{
-        println("File was not created");
-    }
+    putCode("./tests/testsOut/" + "program2str_" + filename, progStr);
     println("");
     parseNemoProgram(progStr, testTitle);
 }
@@ -61,10 +49,10 @@ launchNemoTest(filename : string) -> Program{
     nemoProg;
 }
 
-main(){
+/*main(){
     test1 = launchNemoTest("test1.nemo");
     test2 = launchNemoTest("test2.nemo");
     test3 = launchNemoTest("test3.nemo");
     test4 = launchNemoTest("test4.nemo");
     test5 = launchNemoTest("test5.nemo");
-}
+}*/
