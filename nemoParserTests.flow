@@ -1,54 +1,65 @@
 import runtime;
 import NeMo/nemo;
 
-launchTest(filename : string){
-    fileIn = "./tests/testsIn/" + filename;
-    println("TestFile: " + fileIn);
+getCode(fileIn : string) -> string{
+    println("Read test file: " + fileIn);
     testCode = getFileContent(fileIn);
     println(testCode);
-    switch (str2program(testCode) : Maybe<Program>) {
+    println("");
+    testCode;
+}
+
+parseNemoProgram(code : string, testTitle : string) -> Program{
+    println("str2program " + testTitle);
+    switch (str2program(code) : Maybe<Program>) {
         Some(prog):{
             println("str2program(fileContent : string)");
             println(prog);
             println("");
-            println("program2str(NeMoProg : Program)");
-            progStr = program2str(prog);
-            println(progStr);
-            println("");
-            if(setFileContent("./tests/testsOut/" + "program2str_"+filename, progStr)){
-                println("File was created");
-            }
-            else{
-                println("File was not created");
-            }
-            println("");
-            switch (str2program(progStr) : Maybe<Program>) {
-                Some(prog2):{
-                    println("str2program(programFromNeMo2str)");
-                    println(prog2);
-                    println("");
-                    if(prog == prog2) {
-                        println("Seccessful: NeMo -> string -> NeMo");
-                    }
-                    else {
-                        println("Error: NeMo -> string -> NeMo");
-                    }
-                }
-                None():{
-                    println("ParserError: NeMo -> string -> NeMo");     
-                }
-            }
+            prog;
         }
         None():{
-            println("ParserError: " + filename + " -> NeMo");     
+            println("ParserError: " + testTitle);
+            Program([],Print(IntExpr(0)));     
         }
     }
 }
 
+program2str2program(prog : Program, testTitle : string, filename : string) -> Program{
+    println("program2file2program " + testTitle);
+    println("program2str(NeMoProg : Program)");
+    progStr = program2str(prog);
+    println(progStr);
+    println("");
+    if(setFileContent("./tests/testsOut/" + "program2str_" + filename, progStr)){
+        println("File was created");
+    }else{
+        println("File was not created");
+    }
+    println("");
+    parseNemoProgram(progStr, testTitle);
+}
+
+launchNemoTest(filename : string) -> Program{
+    fileIn = "./tests/testsIn/" + filename;
+    testCode = getCode(fileIn);
+    nemoProg = parseNemoProgram(testCode, "Nemo -> string");
+    if(nemoProg != Program([],Print(IntExpr(0)))){
+        progFromStrFromProg = program2str2program(nemoProg, "NeMo -> string -> NeMo", filename);
+        if(nemoProg == progFromStrFromProg) {
+            println("Seccessful: NeMo -> string -> NeMo");
+        } else {
+            println("Error: NeMo -> string -> NeMo");
+        }
+    }
+    println("");
+    nemoProg;
+}
+
 main(){
-    //launchTest("test1.nemo");
-    //launchTest("test2.nemo");
-    //launchTest("test3.nemo");
-    //launchTest("test4.nemo");
-    launchTest("test5.nemo");
+    test1 = launchNemoTest("test1.nemo");
+    test2 = launchNemoTest("test2.nemo");
+    test3 = launchNemoTest("test3.nemo");
+    test4 = launchNemoTest("test4.nemo");
+    test5 = launchNemoTest("test5.nemo");
 }
