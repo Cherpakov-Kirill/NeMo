@@ -29,18 +29,13 @@ export{
     vmprogram2str(program: VMProgram) -> string;
 }
 
-makeLabelsArray(labels: [flow]) -> [int]{
-    concat([labels[0]], labels[1]);
-}
-
 makeMinusVMInt(bodies: [flow]) -> VMIntExpr{
     val = bodies[0];
     VMIntExpr(val*(-1));
 }
 
 str2vmprogram(program : string) -> Maybe<VMProgram> {
-    treeLabels = setTree(defaultPegActions.t, "makeLabelsArray", makeLabelsArray);
-    fullThree = setTree(treeLabels, "makeMinusVMInt", makeMinusVMInt);
+    fullThree = setTree(defaultPegActions.t, "makeMinusVMInt", makeMinusVMInt);
     pegActions = SemanticActions(fullThree);
     grammar = "#include NeMoVirtualMachine/nemovm.lingo";
     ret = parsic3(compilePegGrammar(grammar), program, pegActions, VMProgram([],[VMInstruction(0,VMPrint(VMIntExpr(0),[]))]));
