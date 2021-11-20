@@ -1,54 +1,82 @@
 import runtime;
 import NeMoVirtualMachine/nemovm;
 
-launchTest(filename : string){
-    fileIn = "./tests/testsIn/" + filename;
-    println("TestFile: " + fileIn);
+export {
+    launchVMNemoTest(filename : string) -> VMProgram;
+    launchTranslatorTest(vmprog : VMProgram) -> VMProgram;
+}
+
+getCode(fileIn : string) -> string{
+    println("Read test file: " + fileIn);
     testCode = getFileContent(fileIn);
     println(testCode);
-    switch (str2vmprogram(testCode) : Maybe<VMProgram>) {
+    println("");
+    testCode;
+}
+
+parseVMNemoProgram(code : string, testTitle : string) -> VMProgram{
+    println("str2vmprogram " + testTitle);
+    switch (str2vmprogram(code) : Maybe<VMProgram>) {
         Some(prog):{
             println("str2vmprogram(fileContent : string)");
             println(prog);
             println("");
-            println("vmprogram2str(VMNeMoProg : Program)");
-            progStr = vmprogram2str(prog);
-            println(progStr);
-            println("");
-            if(setFileContent("./tests/testsOut/" + "vmprogram2str_"+filename, progStr)){
-                println("File was created");
-            }
-            else{
-                println("File was not created");
-            }
-            println("");
-            switch (str2vmprogram(progStr) : Maybe<VMProgram>) {
-                Some(prog2):{
-                    println("str2vmprogram(programFromNeMoVM2str)");
-                    println(prog2);
-                    println("");
-                    if(prog == prog2) {
-                        println("Seccessful: NeMoVM -> string -> NeMoVM");
-                    }
-                    else {
-                        println("Error: NeMoVM -> string -> NeMoVM");
-                    }
-                }
-                None():{
-                    println("ParserError: NeMoVM -> string -> NeMoVM");     
-                }
-            }
+            prog;
         }
         None():{
-            println("ParserError: " + filename + " -> NeMoVM");     
+            println("ParserError: " + testTitle);
+            VMProgram([],[VMInstruction(0,VMPrint(VMIntExpr(0),[]))]);     
         }
     }
 }
 
+vmprogram2str2vmprogram(prog : VMProgram, testTitle : string, filename : string) -> VMProgram{
+    println("vmprogram2str2vmprogram " + testTitle);
+    println("vmprogram2str(NeMoProg : Program)");
+    progStr = vmprogram2str(prog);
+    println(progStr);
+    println("");
+    if(setFileContent("./tests/testsOut/" + "vmprogram2str_" + filename, progStr)){
+        println("File was created");
+    }else{
+        println("File was not created");
+    }
+    println("");
+    parseVMNemoProgram(progStr, testTitle);
+}
+
+launchVMNemoTest(filename : string) -> VMProgram{
+    fileIn = "./tests/testsIn/" + filename;
+    testCode = getCode(fileIn);
+    vmnemoProg = parseVMNemoProgram(testCode, "string -> VMNemo");
+    if(vmnemoProg != VMProgram([],[VMInstruction(0,VMPrint(VMIntExpr(0),[]))])){
+        vmprogFromStrFromVMProg = vmprogram2str2vmprogram(vmnemoProg, "VMNemo -> string -> VMNemo", filename);
+        if(vmnemoProg == vmprogFromStrFromVMProg) {
+            println("Seccessful: VMNemo -> string -> VMNemo");
+        } else {
+            println("Error: VMNemo -> string -> VMNemo");
+        }
+    }
+    println("");
+    vmnemoProg;
+}
+
+launchTranslatorTest(vmprog : VMProgram) -> VMProgram{
+    println("Translator testing in VM");
+    vmprogFromStrFromVMProg = vmprogram2str2vmprogram(vmprog, "VMNemo -> string -> VMNemo", "translator");
+    if(vmprog == vmprogFromStrFromVMProg) {
+        println("Seccessful: VMNemo -> string -> VMNemo");
+    } else {
+        println("Error: VMNemo -> string -> VMNemo");
+    }
+    println("");
+    vmprog;
+}
+
 main(){
-    launchTest("test1.vmnemo");
-    //launchTest("test2.vmnemo");
-    //launchTest("test3.vmnemo");
-    //launchTest("test4.vmnemo");
-    //launchTest("test5.vmnemo");
+    test1 = launchVMNemoTest("test1.vmnemo");
+    test2 = launchVMNemoTest("test2.vmnemo");
+    //test3 = launchVMNemoTest("test3.vmnemo");
+    //test4 = launchVMNemoTest("test4.vmnemo");
+    //test5 = launchVMNemoTest("test5.vmnemo");
 }
