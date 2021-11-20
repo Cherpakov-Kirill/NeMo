@@ -54,7 +54,7 @@ launchTranslatorTest(vmprog : VMProgram) -> VMProgram{
     println("Translator testing in VM");
     println(vmprog);
     println("");
-    vmprogFromStrFromVMProg = vmprogram2str2vmprogram(vmprog, "VMNemo -> string -> VMNemo", "translator");
+    vmprogFromStrFromVMProg = vmprogram2str2vmprogram(vmprog, "VMNemo -> string -> VMNemo", "translator.vmnemo");
     if(vmprog == vmprogFromStrFromVMProg) {
         println("Seccessful: VMNemo -> string -> VMNemo");
     } else {
@@ -65,9 +65,9 @@ launchTranslatorTest(vmprog : VMProgram) -> VMProgram{
 }
 
 /*main(){
-    test1 = launchVMNemoTest("test1.vmnemo");
-    test2 = launchVMNemoTest("test2.vmnemo");
-    //test3 = launchVMNemoTest("test3.vmnemo");
+    //test1 = launchVMNemoTest("test1.vmnemo");
+    //test2 = launchVMNemoTest("test2.vmnemo");
+    test3 = launchVMNemoTest("test3.vmnemo");
     //test4 = launchVMNemoTest("test4.vmnemo");
     //test5 = launchVMNemoTest("test5.vmnemo");
 }*/

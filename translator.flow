@@ -1,0 +1,99 @@
+import NeMo/nemo;
+import NeMoVirtualMachine/nemovm;
+
+export {
+    InstructionState(instructions : [VMInstruction], maxLabel : int);
+    nemo2nemovm(nemo: Program) -> VMProgram;
+}
+
+
+nemo2nemovm(nemo: Program) -> VMProgram{
+    declarations = vars2vmvars(nemo.declarations);
+    instructions = progBody2vminstr(nemo.body, InstructionState([],-1)).instructions;
+    VMProgram(declarations, instructions);
+}
+
+vars2vmvars(vars : [Variable]) -> [VMVariable] {
+    map(vars, var2vmvar);
+}
+
+var2vmvar(var : Variable) -> VMVariable{
+    name = var.name;
+    vmtype = type2vmtype(var.type);
+    VMVariable(name,vmtype);
+}
+
+type2vmtype(type: Type) -> VMType{
+    switch (type : Type) {
+        Int(): {
+            VMInt();
+        }
+        Array(t): {
+            VMArray(type2vmtype(t));
+        }
+    }
+}
+
+progBody2vminstr(body : Body, prevState : InstructionState) -> InstructionState {
+    switch (body) {
+        Assign(var, value): {
+            currentLabel = prevState.maxLabel+1;
+            nextLabel = currentLabel + 1;
+            InstructionState(concat(prevState.instructions, [VMInstruction(currentLabel,VMAssign(var,expr2vmexpr(value), [nextLabel]))]), currentLabel);
+        }
+        Test(operation, leftExpr, rightExpr): {
+            currentLabel = prevState.maxLabel+1;
+            nextLabel = currentLabel + 1;
+            InstructionState(concat(prevState.instructions, [VMInstruction(currentLabel,VMTest(operation,expr2vmexpr(leftExpr),expr2vmexpr(rightExpr),[nextLabel],[]))]), currentLabel);
+        }
+        Sequence(bodies): {
+            fold(bodies, prevState, \state, body_i -> progBody2vminstr(body_i, state));
+        }             
+        Choice(bodies): {
+            choiceStartLabel = prevState.maxLabel + 1;
+            instructionStatesArray = fold(bodies, [InstructionState([],choiceStartLabel)], \state, body_i -> concat(state, [progBody2vminstr(body_i, state[length(state)-1])]));
+            instrLastLabels = map(instructionStatesArray,\instr -> instr.maxLabel);
+            instrFirstLabels = map(take(instrLastLabels, length(instrLastLabels) - 1), \label -> label + 1); 
+            startChoice = VMInstruction(choiceStartLabel,VMTest("==",VMIntExpr(0),VMIntExpr(0), instrFirstLabels, []));
+            InstructionState(concat3(prevState.instructions, [startChoice], instructionStatesArray[length(instructionStatesArray) - 1].instructions), (instructionStatesArray[length(instructionStatesArray) - 1]).maxLabel);
+        }                
+        Loop(progBody): {
+            startLoopLabel = prevState.maxLabel + 1;
+            inLabel = prevState.maxLabel + 2;
+            translatedBody = progBody2vminstr(progBody, InstructionState([],startLoopLabel));
+            finishLoopLabel = translatedBody.maxLabel + 1;
+            outLabel = translatedBody.maxLabel + 2;
+            startLoop = VMInstruction(startLoopLabel,VMTest("==",VMIntExpr(0),VMIntExpr(0), [inLabel, outLabel], []));
+            finishLoop = VMInstruction(finishLoopLabel,VMTest("==",VMIntExpr(0),VMIntExpr(0), [startLoopLabel], []));
+            InstructionState(concatA([prevState.instructions, [startLoop], translatedBody.instructions, [finishLoop]]), finishLoopLabel);
+        }                       
+        Print(expr): {
+            currentLabel = prevState.maxLabel+1;
+            nextLabel = currentLabel + 1;
+            InstructionState(concat(prevState.instructions, [VMInstruction(currentLabel,VMPrint(expr2vmexpr(expr), [nextLabel]))]), currentLabel);
+        }
+    }
+}
+
+expr2vmexpr(expr : Expression) -> VMExpression {
+    switch (expr) {
+        MathOpExpr(operation, l, r): {
+            VMMathOpExpr(operation, expr2vmexpr(l), expr2vmexpr(r));
+        }
+        ArSetValExpr(array, index, value): {
+            VMArSetValExpr(VMVarExpr(array.name), expr2vmexpr(index), expr2vmexpr(value));
+        }
+        ArGetValExpr(array, index): {
+            VMArGetValExpr(VMVarExpr(array.name), expr2vmexpr(index));
+        }
+        ArLenExpr(array): {
+            VMArLenExpr(VMVarExpr(array.name));
+        }
+        VarExpr(name): {
+            VMVarExpr(name);
+        }
+        IntExpr(value): {
+            VMIntExpr(value);
+        }
+    }
+}

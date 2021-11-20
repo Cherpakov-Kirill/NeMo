@@ -1,0 +1,10 @@
+VAR x : INT;
+0: x := 1 goto {1}
+1: if (0 == 0) then {2, 4, 6} else {}
+2: print(x) goto {3}
+3: x := 2 goto {4}
+4: print(x) goto {5}
+5: x := 3 goto {6}
+6: print(x) goto {7}
+7: x := 4 goto {8}
+8: print(x) goto {9}
