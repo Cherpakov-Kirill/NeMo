@@ -22,7 +22,7 @@ arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expre
 arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {VMArGetValExpr(:arr, :index)};
 arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                                                         {VMArLenValExpr(:arr)};
 varExpr = sp letter+$l sp                                                                                   {VMVarExpr($l)};
-minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusInt(s2i(:v))};
+minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusVMInt(s2i(:v))};
 intExpr = sp digit+$v sp                                                                                    {VMIntExpr(s2i(:v))};
 
 condition   = "!=" | "==" | "<=" | ">=" | "<" | ">" ;
