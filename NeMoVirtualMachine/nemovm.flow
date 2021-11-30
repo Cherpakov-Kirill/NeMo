@@ -27,6 +27,8 @@ export{
 
     str2vmprogram(program : string) -> Maybe<VMProgram>;
     vmprogram2str(program: VMProgram) -> string;
+    vmexpression2str(expr : VMExpression) -> string;
+    array2str(arr : [?], trans : (?) -> string) -> string;
 }
 
 makeMinusVMInt(bodies: [flow]) -> VMIntExpr{
@@ -83,20 +85,24 @@ vminstruction2str(instruction : VMInstruction) -> string{
     i2s(instruction.label) + ": " + vmprogBody2str(instruction.body);
 }
 
-array2str(arr : [int]) -> string{
+intArray2str(arr : [int]) -> string{
     "{" + rtrim2(fold(arr, "", \acc, elem_i -> acc + i2s(elem_i) + ", "), ", ") + "}";
+}
+
+array2str(arr : [?], trans : (?) -> string) -> string{
+    "[" + rtrim2(fold(arr, "", \acc, elem_i -> acc + trans(elem_i) + ", "), ", ") + "]";
 }
 
 vmprogBody2str(body : VMBody) -> string {
     switch (body) {
         VMAssign(var, value, goto): {
-            var + " := " + vmexpression2str(value) + " goto " + array2str(goto) + "\n";
+            var + " := " + vmexpression2str(value) + " goto " + intArray2str(goto) + "\n";
         }
         VMTest(operation, leftExpr, rightExpr, ifLabels, elseLabels): {
-            "if (" + vmexpression2str(leftExpr) + " " + operation + " " + vmexpression2str(rightExpr) + ") then " + array2str(ifLabels) + " else " + array2str(elseLabels) + "\n";
+            "if (" + vmexpression2str(leftExpr) + " " + operation + " " + vmexpression2str(rightExpr) + ") then " + intArray2str(ifLabels) + " else " + intArray2str(elseLabels) + "\n";
         }         
         VMPrint(expr, goto): {
-            "print(" + vmexpression2str(expr) + ") goto " + array2str(goto) + "\n";
+            "print(" + vmexpression2str(expr) + ") goto " + intArray2str(goto) + "\n";
         }
     }
 }
