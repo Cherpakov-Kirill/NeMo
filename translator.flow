@@ -51,11 +51,18 @@ progBody2vminstr(body : Body, prevState : InstructionState) -> InstructionState 
         }             
         Choice(bodies): {
             choiceStartLabel = prevState.maxLabel + 1;
-            instructionStatesArray = fold(bodies, [InstructionState([],choiceStartLabel)], \state, body_i -> concat(state, [progBody2vminstr(body_i, state[length(state)-1])]));
-            instrLastLabels = map(instructionStatesArray,\instr -> instr.maxLabel);
-            instrFirstLabels = map(take(instrLastLabels, length(instrLastLabels) - 1), \label -> label + 1); 
+            instrArrFromBody = fold(tail(bodies), [progBody2vminstr(bodies[0], InstructionState([],choiceStartLabel))], \state, body_i -> concat(state, [progBody2vminstr(body_i, InstructionState([], state[length(state)-1].maxLabel + 1))]));
+            
+            instrLastLabels = map(instrArrFromBody,\instr -> instr.maxLabel);
+            lastMaxLabel = (instrArrFromBody[length(instrArrFromBody) - 1]).maxLabel;
+            tailOfInstrFirstLabels = map(take(instrLastLabels, length(instrLastLabels) - 1), \label -> label + 2);
+            instrFirstLabels = concat([choiceStartLabel + 1], tailOfInstrFirstLabels);
+            instructionStatesArray = concat(map(take(instrArrFromBody, length(instrArrFromBody) - 1), 
+                \state -> InstructionState(concat(state.instructions, [VMInstruction(state.maxLabel+1, VMTest("==",VMIntExpr(0),VMIntExpr(0), [lastMaxLabel+1], []))]), state.maxLabel+1)), [instrArrFromBody[length(instrArrFromBody) - 1]]); 
+            instructionsArray = fold(instructionStatesArray, [], \instructions, state_i -> concat(instructions, state_i.instructions));
+            
             startChoice = VMInstruction(choiceStartLabel,VMTest("==",VMIntExpr(0),VMIntExpr(0), instrFirstLabels, []));
-            InstructionState(concat3(prevState.instructions, [startChoice], instructionStatesArray[length(instructionStatesArray) - 1].instructions), (instructionStatesArray[length(instructionStatesArray) - 1]).maxLabel);
+            InstructionState(concat3(prevState.instructions, [startChoice], instructionsArray), lastMaxLabel);
         }                
         Loop(progBody): {
             startLoopLabel = prevState.maxLabel + 1;

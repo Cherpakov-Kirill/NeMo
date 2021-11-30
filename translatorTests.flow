@@ -6,13 +6,13 @@ import translator;
 launchTest(filename : string){
     nemoProg = launchNemoTest(filename);
     vmnemoProgFromTranslator = nemo2nemovm(nemoProg);
-    vmnemoProgFromTest = launchTranslatorTest(vmnemoProgFromTranslator);
+    vmnemoProgFromTest = launchTranslatorTest(vmnemoProgFromTranslator, filename);
 }
 
 main(){
-    launchTest("test1.nemo");
-    launchTest("test2.nemo");
+    //launchTest("test1.nemo");
+    //launchTest("test2.nemo");
     launchTest("test3.nemo");
-    launchTest("test4.nemo");
-    launchTest("test5.nemo");
+    //launchTest("test4.nemo");
+    //launchTest("test5.nemo");
 }
