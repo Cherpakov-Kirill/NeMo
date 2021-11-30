@@ -4,7 +4,7 @@ import fileUtils;
 
 export {
     launchVMNemoTest(filename : string) -> VMProgram;
-    launchTranslatorTest(vmprog : VMProgram) -> VMProgram;
+    launchTranslatorTest(vmprog : VMProgram, filename : string) -> VMProgram;
 }
 
 parseVMNemoProgram(code : string, testTitle : string) -> VMProgram{
@@ -50,11 +50,11 @@ launchVMNemoTest(filename : string) -> VMProgram{
     vmnemoProg;
 }
 
-launchTranslatorTest(vmprog : VMProgram) -> VMProgram{
+launchTranslatorTest(vmprog : VMProgram, filename : string) -> VMProgram{
     println("Translator testing in VM");
     println(vmprog);
     println("");
-    vmprogFromStrFromVMProg = vmprogram2str2vmprogram(vmprog, "VMNemo -> string -> VMNemo", "translator.vmnemo");
+    vmprogFromStrFromVMProg = vmprogram2str2vmprogram(vmprog, "VMNemo -> string -> VMNemo", "("+filename+").vmnemo");
     if(vmprog == vmprogFromStrFromVMProg) {
         println("Seccessful: VMNemo -> string -> VMNemo");
     } else {
