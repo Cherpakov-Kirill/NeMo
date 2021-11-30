@@ -50,9 +50,10 @@ launchNemoTest(filename : string) -> Program{
 }
 
 /*main(){
-    test1 = launchNemoTest("test1.nemo");
-    test2 = launchNemoTest("test2.nemo");
-    test3 = launchNemoTest("test3.nemo");
-    test4 = launchNemoTest("test4.nemo");
-    test5 = launchNemoTest("test5.nemo");
+    //test1 = launchNemoTest("test1.nemo");
+    //test2 = launchNemoTest("test2.nemo");
+    //test3 = launchNemoTest("test3.nemo");
+    //test4 = launchNemoTest("test4.nemo");
+    //test5 = launchNemoTest("test5.nemo");
+    test6 = launchNemoTest("test6.nemo");
 }*/
