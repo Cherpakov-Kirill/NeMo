@@ -1,0 +1,9 @@
+VAR x : INT;
+
+0: x := 1 goto {1}
+1: print(x) goto {2}
+2: array := (set(array, 2, 58878)) goto {3}
+3: array := (set(array, 3, 857857)) goto {4}
+4: print((get(array, 3))) goto {5}
+5: if ((get(array, 3)) == 857857) then {6} else {7}
+6: print((get(array, 2))) goto {7}

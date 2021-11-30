@@ -1,0 +1,8 @@
+VAR array : [INT];
+VAR arrsize : INT;
+VAR i : INT;
+0: array := (set(array, 5, 5)) goto {1}
+1: arrsize := 10 goto {2}
+2: print((get(array, 5))) goto {3}
+3: array := (set(array, 10, 5)) goto {4}
+4: print((get(array, 7))) goto {5}

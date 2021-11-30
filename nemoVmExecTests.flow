@@ -1,0 +1,25 @@
+import nemoVMParserTests;
+import nemoParserTests;
+import translator;
+import NeMoVirtualMachine/nemovmexecutor;
+import NeMoVirtualMachine/nemovmexecdebugger;
+
+launchNemoExecTest(filename : string) -> void{
+    nemoVmProg = launchVMNemoTest(filename);
+    states = executeVMProgram(nemoVmProg);
+    //println("Is there empty state? If yes, successfuly!");
+    printStateArray(states);
+}
+
+launchAllNemoMachine(filename : string) -> void{
+    nemoProg = launchNemoTest(filename);
+    vmnemoProgFromTranslator = nemo2nemovm(nemoProg);
+    vmnemoProgFromTest = launchTranslatorTest(vmnemoProgFromTranslator, filename);
+    states = executeVMProgram(vmnemoProgFromTest);
+    //println("Is there empty state? If yes, successfuly!");
+    printStateArray(states);
+}
+
+main(){
+    launchAllNemoMachine("test5.nemo");
+}

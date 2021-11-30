@@ -1,4 +1,4 @@
 VAR array : [INT];
 VAR arrsize : INT;
 VAR i : INT;
-(array := (set(array, 5, 5)); arrsize := 10; print((get(array, 5))); array := (set(array, 5, 5)))
+(array := (set(array, 5, 5)); arrsize := 10; print((get(array, 5))); array := (set(array, 10, 5)); print((get(array, 7))))
