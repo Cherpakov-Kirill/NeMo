@@ -1,0 +1,32 @@
+import NeMoVirtualMachine/nemovm;
+import NeMoVirtualMachine/runtimeElements;
+
+export {
+    printVarTree(vars : Tree<string, Value>, title : string) -> void;
+    printState(state : State) -> void;
+    printStateArray(states : [State]) -> void;
+}
+
+
+
+printVarTree(vars : Tree<string, Value>, title : string) -> void{
+    str = rtrim2(foldTree(vars, "", \var,value,accumulator -> accumulator + "{" + var + " = " + val2str(value) + "}; "), "; ");
+    println(title + " : " + str);
+}
+
+val2str(value : Value) -> string {
+    switch (value) {
+        exInt(val) : i2s(val);
+        exArr(arr) : array2str(arr, val2str);
+    }
+}
+
+printStateArray(states : [State]) -> void{
+    map(states, printState);
+    println("________")
+}
+
+printState(state : State) -> void{
+    println("Label = " + i2s(state.label));
+    printVarTree(state.vars, "State var tree | label = " + i2s(state.label));
+}

@@ -1,0 +1,221 @@
+import runtime;
+import NeMoVirtualMachine/nemovm;
+import NeMoVirtualMachine/nemovmexecdebugger;
+import NeMoVirtualMachine/runtimeElements;
+
+export {
+    executeVMProgram(program: VMProgram) -> [State];
+}
+
+executeVMProgram(program: VMProgram) -> [State]{
+    varTree = createVarTree(program.declarations);
+    printVarTree(varTree, "Declarated vars"); //debug
+    executeInstructions([State(0, varTree)], program.instructions);
+}
+
+createVarTree(declarations : [VMVariable]) -> Tree<string, Value>{
+    fold(declarations, makeTree(), \tree, decl_i ->
+        setTree(tree, decl_i.name, getVarType(decl_i.type)));
+}
+
+getVarType(type : VMType) -> Value {
+    switch (type) {
+        VMInt() : exInt(0);
+        VMArray(t) : exArr([getVarType(t)]);
+    }
+}
+
+executeInstructions(states : [State], instructions : [VMInstruction]) -> [State] {
+    statesNew = mapConcat(states, \state -> {
+        label = findi(instructions, \instr -> state.label == instr.label);
+        switch (label) {
+            Some(intVal) :  executeInstruction(state, instructions[intVal]);
+            None() : [];
+        }
+    });
+    if (length(statesNew) != 0) {
+        printStateArray(statesNew); //debug
+        executeInstructions(statesNew, instructions);
+    } else {
+        [];
+    }
+}
+
+executeInstruction(state : State, instruction : VMInstruction) -> [State] {
+    instr_body = instruction.body;
+    switch(instr_body){
+        VMAssign(var, value, goto):                                     executeAssign(state, instr_body);
+        VMTest(operation, leftExpr, rightExpr, ifLabels, elseLabels):   executeTest(state, instr_body);
+        VMPrint(expr, goto):                                            executePrint(state, instr_body);
+    }
+}
+
+executeAssign(state : State, assignBody : VMAssign) -> [State]{
+    newVal = expression2val(assignBody.value, state.vars);
+    variebleValue = findVariebleValueInVarsTree(assignBody.var, state.vars);
+    if(isSameTypes(newVal, variebleValue)){
+        varsUpdatedTree = setTree(state.vars, assignBody.var, newVal);
+        map(assignBody.goto, \label -> State(label, varsUpdatedTree));
+    }
+    else{
+        fail0("executeAssign: not equal types of new value and varieble");
+    }
+}
+
+executePrint(state : State, printBody : VMPrint) -> [State]{
+    val = expression2val(printBody.expr, state.vars);
+
+    println(value2str(val));
+    map(printBody.goto, \label -> State(label, state.vars));
+}
+
+executeTest(state : State, testBody : VMTest) -> [State]{
+    leftValue = checkValueOnInt(expression2val(testBody.l, state.vars),"executeTest: left test expr is not Int-type");
+    rightValue = checkValueOnInt(expression2val(testBody.r, state.vars),"executeTest: right test expr is not Int-type");
+    
+    if (getConditionResult(testBody.operation, leftValue.value, rightValue.value)) {
+        map(testBody.iflabel, \label -> State(label, state.vars));
+    } else {
+        map(testBody.elselabel, \label -> State(label, state.vars));
+    }
+}
+
+getConditionResult(operation : string, left : int, right : int) -> bool{
+    //"!=" | "==" | "<=" | ">=" | "<" | ">"
+    if(operation == "!="){
+        left != right;
+    } else{
+        if(operation == "=="){
+            left == right;
+        } else{
+            if(operation == "<="){
+                left <= right;
+            } else{
+                if(operation == ">="){
+                    left >= right;
+                } else {
+                    if(operation == "<"){
+                        left < right;
+                    }
+                    else {
+                        if(operation == ">"){
+                            left > right;
+                        }
+                        else {
+                            fail0("VMMathOpExpr: not supported math operation");
+                        }
+                    }
+                }
+            } 
+        }
+    }
+}
+
+expression2val(expr: VMExpression, vars : Tree<string, Value>) -> Value{
+    switch (expr) {
+        VMMathOpExpr(operation, l, r): {
+            if(operation == "+"){
+                exInt(expression2i(l, vars) + expression2i(r, vars));
+            } else{
+                if(operation == "-"){
+                    exInt(expression2i(l, vars) - expression2i(r, vars));
+                } else{
+                    if(operation == "*"){
+                        exInt(expression2i(l, vars) * expression2i(r, vars));
+                    } else{
+                        if(operation == "/"){
+                            exInt(expression2i(l, vars) /  expression2i(r, vars));
+                        } else {
+                            if(operation == "%"){
+                                exInt(expression2i(l, vars) %  expression2i(r, vars));
+                            }
+                            else {
+                                fail0("VMMathOpExpr: not supported math operation");
+                            }
+                        }
+                    } 
+                }
+            }
+        }
+        VMArSetValExpr(array, index, value): {
+            arrayValue = checkValueOnArray(expression2val(array, vars),"VMArSetValExpr: array varieble is not Array-type");
+            indexValue = checkValueOnInt(expression2val(index, vars),"VMArSetValExpr: index varieble is not Int-type");
+            valueValue = expression2val(value, vars);
+            if(isSameTypes(valueValue, arrayValue.array[0])){
+                currentArrayLenth = length(arrayValue.array);
+                if(indexValue.value < currentArrayLenth){
+                    exArr(replace(arrayValue.array, indexValue.value, valueValue))
+                }
+                else{
+                    exArr(concat3(arrayValue.array, arrayRepeat(exInt(0), indexValue.value - currentArrayLenth), [valueValue]));
+                }
+            }
+            else{
+                fail0("VMArSetValExpr: not equal types of new value and array");
+            }
+        }
+        VMArGetValExpr(array, index): {
+            arrayValue = checkValueOnArray(expression2val(array, vars),"VMArGetValExpr: array varieble is not Array-type");
+            indexValue = checkValueOnInt(expression2val(index, vars),"VMArGetValExpr: index varieble is not Int-type");
+            arrayValue.array[indexValue.value];
+        }
+        VMArLenExpr(array): {
+            arrayValue = checkValueOnArray(expression2val(array, vars),"VMArLenExpr: array varieble is not Array-type");
+            exInt(length(arrayValue.array));
+        }
+        VMVarExpr(name): {
+            findVariebleValueInVarsTree(name, vars);
+        }
+        VMIntExpr(value): {
+            exInt(value);
+        }
+    }
+}
+
+isSameTypes(value1 : Value, value2 : Value) -> bool{
+    if (value1.structname == value2.structname) {
+        switch (value1) {
+            exInt(val1) : true;
+            exArr(arr1) : {
+                switch (value2) {
+                    exInt(val2) : false;
+                    exArr(arr2) : isSameTypes(arr1[0], arr2[0]);
+                }
+            }
+        }
+    } else {
+        false;
+    }
+}
+
+findVariebleValueInVarsTree(name : string, vars : Tree<string, Value>) -> Value{
+    switch (lookupTree(vars, name)) {
+        Some(value) : value;
+        None() : fail0("var '" + name + "' wasn't initialized");
+    }
+}
+
+expression2i(expr : VMExpression, vars : Tree<string, Value>) -> int{
+    checkValueOnInt(expression2val(expr, vars), "expression2i : VMExpression = " + vmexpression2str(expr)).value;
+}
+
+value2str(value : Value) -> string {
+    switch (value) {
+        exInt(val) : i2s(val);
+        exArr(arr) : array2str(arr, value2str);
+    }
+}
+
+checkValueOnArray(value : Value, errorMessage : string) -> exArr{
+    switch (value) {
+        exInt(v) : fail0(errorMessage);
+        exArr(a) : value;
+    }
+}
+
+checkValueOnInt(value : Value, errorMessage : string) -> exInt{
+    switch (value) {
+        exInt(v) : value;
+        exArr(a) : fail0(errorMessage);
+    }
+}
