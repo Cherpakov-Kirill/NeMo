@@ -3,8 +3,9 @@ declaration = "VAR" sp variableName:n sp ":" sp variableType:t ";" sp       {VMV
 instruction = sp digit+ $v sp ":" sp programBody:b sp                        {VMInstruction(s2i($v), :b)};
 
 
-variableType = int | array;
+variableType = int | bool | array;
 int = "INT" sp                      {VMInt()};
+bool = "BOOL" sp                      {VMBool()};
 array = "[" variableType:t "]" sp   {VMArray(:t)};
 
 programBody = assign | test | print;
@@ -17,7 +18,7 @@ intArray = labelNumbers*:arrLabels labelNumber?:l   {concat(:arrLabels, :l)};
     labelNumbers = labelNumber:l sp "," sp {:l};
     labelNumber = digit+$l {s2i($l)};
 
-expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | varExpr | minusInt | intExpr;
+expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | minusInt | intExpr | boolExpr | varExpr;
 mathOpExpr = "(" sp expression:l ("+"|"*"|"/"|"-"|"%")$o sp expression:r ")" sp                             {VMMathOpExpr($o, :l, :r)};
 arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {VMArSetValExpr(:arr, :index, :var)};
 arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {VMArGetValExpr(:arr, :index)};
@@ -25,6 +26,7 @@ arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                             
 varExpr = sp letter+$l sp                                                                                   {VMVarExpr($l)};
 minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusVMInt(s2i(:v))};
 intExpr = sp digit+$v sp                                                                                    {VMIntExpr(s2i(:v))};
+boolExpr = sp ("true" | "false")$boolVal sp                                                                 {makeVMBool($boolVal)};
 
 condition   = "!=" | "==" | "<=" | ">=" | "<" | ">" ;
 

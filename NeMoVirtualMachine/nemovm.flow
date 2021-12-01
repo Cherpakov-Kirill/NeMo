@@ -13,17 +13,19 @@ export{
 
     VMVariable(name : string, type : VMType);
 
-    VMType ::= VMInt, VMArray;
+    VMType ::= VMInt, VMBool, VMArray;
     VMInt();
+    VMBool();
     VMArray(type : VMType);
 
-    VMExpression ::= VMMathOpExpr, VMArSetValExpr, VMArGetValExpr, VMArLenExpr, VMVarExpr, VMIntExpr;
+    VMExpression ::= VMMathOpExpr, VMArSetValExpr, VMArGetValExpr, VMArLenExpr, VMVarExpr, VMIntExpr, VMBoolExpr;
     VMMathOpExpr(operation: string, l: VMExpression, r: VMExpression);
     VMArSetValExpr(array: VMVarExpr, index: VMExpression, value: VMExpression);
     VMArGetValExpr(array: VMVarExpr, index: VMExpression);
     VMArLenExpr(array: VMVarExpr);
     VMVarExpr(name: string);
     VMIntExpr(value: int);
+    VMBoolExpr(value: bool);
 
     str2vmprogram(program : string) -> Maybe<VMProgram>;
     vmprogram2str(program: VMProgram) -> string;
@@ -36,8 +38,18 @@ makeMinusVMInt(bodies: [flow]) -> VMIntExpr{
     VMIntExpr(val*(-1));
 }
 
+makeVMBool(bodies: [flow]) -> VMBoolExpr{
+    str = bodies[0];
+    if(str == "true"){
+        VMBoolExpr(true);
+    } else{
+        VMBoolExpr(false);
+    }
+}
+
 str2vmprogram(program : string) -> Maybe<VMProgram> {
-    fullThree = setTree(defaultPegActions.t, "makeMinusVMInt", makeMinusVMInt);
+    treeBool = setTree(defaultPegActions.t, "makeVMBool", makeVMBool);
+    fullThree = setTree(treeBool, "makeMinusVMInt", makeMinusVMInt);
     pegActions = SemanticActions(fullThree);
     grammar = "#include NeMoVirtualMachine/nemovm.lingo";
     ret = parsic3(compilePegGrammar(grammar), program, pegActions, VMProgram([],[VMInstruction(0,VMPrint(VMIntExpr(0),[]))]));
@@ -69,6 +81,9 @@ vmtype2str(type: VMType) -> string{
     switch (type : VMType) {
         VMInt(): {
             "INT";
+        }
+        VMBool(): {
+            "BOOL";
         }
         VMArray(t): {
             "[" + vmtype2str(t) + "]";
@@ -126,6 +141,9 @@ vmexpression2str(expr : VMExpression) -> string {
         }
         VMIntExpr(value): {
             i2s(value);
+        }
+        VMBoolExpr(value): {
+            b2s(value);
         }
     }
 }
