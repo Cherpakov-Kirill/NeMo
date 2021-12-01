@@ -100,7 +100,7 @@ str2program(program: string) -> Maybe<Program> {
     treeChoice = setTree(treeSequence, "makeChoise", makeChoise);
     treeIf = setTree(treeChoice, "makeIfElse", makeIfElse);
     treeWhile = setTree(treeIf, "makeWhile", makeWhile);
-    treeBool = setTree(treeIf, "makeBool", makeBool);
+    treeBool = setTree(treeWhile, "makeBool", makeBool);
     fullThree = setTree(treeBool, "makeMinusInt", makeMinusInt);
     pegActions = SemanticActions(fullThree);
     grammar = "#include NeMo/nemo.lingo";
