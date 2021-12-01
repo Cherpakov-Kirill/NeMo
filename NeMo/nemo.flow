@@ -64,7 +64,7 @@ makeIfElse(bodies: [flow]) -> Choice{
     elseBody = bodies[4];
     Choice([
         Sequence([Test(cond, leftExpr, rightExpr), ifBody]),
-        Sequence([Test(reverseCondition(cond), leftExpr, rightExpr), ifBody])
+        Sequence([Test(reverseCondition(cond), leftExpr, rightExpr), elseBody])
     ]);
 }
 
