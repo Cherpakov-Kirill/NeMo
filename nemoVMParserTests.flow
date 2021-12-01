@@ -67,7 +67,8 @@ launchTranslatorTest(vmprog : VMProgram, filename : string) -> VMProgram{
 /*main(){
     //test1 = launchVMNemoTest("test1.vmnemo");
     //test2 = launchVMNemoTest("test2.vmnemo");
-    test3 = launchVMNemoTest("test3.vmnemo");
+    //test3 = launchVMNemoTest("test3.vmnemo");
     //test4 = launchVMNemoTest("test4.vmnemo");
     //test5 = launchVMNemoTest("test5.vmnemo");
+    test6 = launchVMNemoTest("test6.vmnemo");
 }*/

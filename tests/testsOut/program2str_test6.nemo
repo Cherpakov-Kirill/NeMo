@@ -1,2 +1,2 @@
-VAR y : INT;
-y := 1
+VAR y : BOOL;
+y := true

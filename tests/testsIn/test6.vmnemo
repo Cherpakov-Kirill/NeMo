@@ -1,0 +1,2 @@
+VAR y : BOOL;
+0: y := true goto {1}
