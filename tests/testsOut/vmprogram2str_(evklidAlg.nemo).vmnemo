@@ -1,0 +1,15 @@
+VAR a : INT;
+VAR b : INT;
+0: a := 1089 goto {1}
+1: b := 15615 goto {2}
+2: if (0 == 0) then {3, 11} else {}
+3: if (a != b) then {4} else {}
+4: if (0 == 0) then {5, 8} else {}
+5: if (a > b) then {6} else {}
+6: a := (a - b) goto {7}
+7: if (0 == 0) then {10} else {}
+8: if (a <= b) then {9} else {}
+9: b := (b - a) goto {10}
+10: if (0 == 0) then {2} else {}
+11: if (a == b) then {12} else {}
+12: print(a) goto {13}

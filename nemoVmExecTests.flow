@@ -21,5 +21,6 @@ launchAllNemoMachine(filename : string) -> void{
 }
 
 main(){
-    launchAllNemoMachine("test5.nemo");
+    //launchAllNemoMachine("test5.nemo");
+    launchAllNemoMachine("evklidAlg.nemo");
 }
