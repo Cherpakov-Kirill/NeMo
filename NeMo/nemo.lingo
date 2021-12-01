@@ -3,8 +3,9 @@ declaration = "VAR" sp variableName:n sp ":" sp variableType:t ";" sp         {V
 
 
 
-variableType = int | array;
+variableType = int | bool | array;
 int = "INT" sp                      {Int()};
+bool = "BOOL" sp                      {Bool()};
 array = "[" variableType:t "]" sp   {Array(:t)};
 
 programBody = assign | test | sequence | choice | loop | print | ifelse | while;
@@ -19,7 +20,7 @@ print = sp "print" "(" sp expression:expr sp ")" sp                             
 ifelse = sp "if" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "{" sp programBody:ifBody sp "}" sp  "else" sp "{" sp programBody:elseBody sp "}" {makeIfElse(:left, $cond, :right, :ifBody, :elseBody)};
 while  = sp "while" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "{" sp programBody:body sp "}" sp {makeWhile(:left, $cond, :right, :body)};
 
-expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | varExpr | minusInt | intExpr;
+expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | minusInt | intExpr | boolExpr | varExpr;
 mathOpExpr = "(" sp expression:l ("+"|"*"|"/"|"-"|"%")$o sp expression:r ")" sp                             {MathOpExpr($o, :l, :r)};
 arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {ArSetValExpr(:arr, :index, :var)};
 arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {ArGetValExpr(:arr, :index)};
@@ -27,6 +28,7 @@ arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                             
 varExpr = sp letter+$l sp                                                                                   {VarExpr($l)};
 minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusInt(s2i(:v))};
 intExpr = sp digit+$v sp                                                                                    {IntExpr(s2i(:v))};
+boolExpr = sp ("true" | "false")$boolVal sp                                                                 {makeBool($boolVal)};
 
 condition   = "!=" | "==" | "<=" | ">=" | "<" | ">" ;
 

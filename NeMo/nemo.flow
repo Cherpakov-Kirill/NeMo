@@ -14,17 +14,19 @@ export {
 
     Variable(name : string, type : Type);
 
-    Type ::= Int, Array;
+    Type ::= Int, Bool, Array;
     Int();
+    Bool();
     Array(type : Type);
 
-    Expression ::= MathOpExpr, ArSetValExpr, ArGetValExpr, ArLenExpr, VarExpr, IntExpr;
+    Expression ::= MathOpExpr, ArSetValExpr, ArGetValExpr, ArLenExpr, VarExpr, IntExpr, BoolExpr;
     MathOpExpr(operation: string, l: Expression, r: Expression);
     ArSetValExpr(array: VarExpr, index: Expression, value: Expression);
     ArGetValExpr(array: VarExpr, index: Expression);
     ArLenExpr(array: VarExpr);
     VarExpr(name: string);
     IntExpr(value: int);
+    BoolExpr(value : bool);
 
     str2program(program: string) -> Maybe<Program>;
     program2str(program: Program) -> string;
@@ -79,6 +81,15 @@ makeWhile(bodies: [flow]) -> Sequence{
     ]);
 }
 
+makeBool(bodies: [flow]) -> BoolExpr{
+    str = bodies[0];
+    if(str == "true"){
+        BoolExpr(true);
+    } else{
+        BoolExpr(false);
+    }
+}
+
 makeMinusInt(bodies: [flow]) -> IntExpr{
     val = bodies[0];
     IntExpr(val*(-1));
@@ -89,7 +100,8 @@ str2program(program: string) -> Maybe<Program> {
     treeChoice = setTree(treeSequence, "makeChoise", makeChoise);
     treeIf = setTree(treeChoice, "makeIfElse", makeIfElse);
     treeWhile = setTree(treeIf, "makeWhile", makeWhile);
-    fullThree = setTree(treeWhile, "makeMinusInt", makeMinusInt);
+    treeBool = setTree(treeIf, "makeBool", makeBool);
+    fullThree = setTree(treeBool, "makeMinusInt", makeMinusInt);
     pegActions = SemanticActions(fullThree);
     grammar = "#include NeMo/nemo.lingo";
     ret = parsic3(compilePegGrammar(grammar), program, pegActions, Program([],Print(IntExpr(0))));
@@ -121,6 +133,9 @@ type2str(type: Type) -> string{
     switch (type : Type) {
         Int(): {
             "INT";
+        }
+        Bool(): {
+            "BOOL";
         }
         Array(t): {
             "[" + type2str(t) + "]";
@@ -178,6 +193,9 @@ expression2str(expr : Expression) -> string {
         }
         IntExpr(value): {
             i2s(value);
+        }
+        BoolExpr(value): {
+            b2s(value);
         }
     }
 }
