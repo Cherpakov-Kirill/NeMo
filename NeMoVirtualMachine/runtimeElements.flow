@@ -1,8 +1,9 @@
 import ds/tree;
 export {
-    Value ::= exInt, exArr;
+    Value ::= exInt, exBool, exArr;
     exArr : (array : [Value]);
     exInt(value: int);
+    exBool(value: bool);
     
     State : (label : int, vars : Tree<string, Value>);
 }

@@ -21,6 +21,7 @@ createVarTree(declarations : [VMVariable]) -> Tree<string, Value>{
 getVarType(type : VMType) -> Value {
     switch (type) {
         VMInt() : exInt(0);
+        VMBool() : exBool(false);
         VMArray(t) : exArr([getVarType(t)]);
     }
 }
@@ -169,16 +170,33 @@ expression2val(expr: VMExpression, vars : Tree<string, Value>) -> Value{
         VMIntExpr(value): {
             exInt(value);
         }
+        VMBoolExpr(value): {
+            exBool(value);
+        }
     }
 }
 
 isSameTypes(value1 : Value, value2 : Value) -> bool{
     if (value1.structname == value2.structname) {
         switch (value1) {
-            exInt(val1) : true;
+            exInt(val1) : {
+                switch (value2) {
+                    exInt(val2) : true;
+                    exBool(val2) : false;
+                    exArr(arr2) : false;
+                }
+            }
+            exBool(val1) : {
+                switch (value2) {
+                    exInt(val2) : false;
+                    exBool(val2) : true;
+                    exArr(arr2) : false;
+                }
+            }
             exArr(arr1) : {
                 switch (value2) {
                     exInt(val2) : false;
+                    exBool(val2) : false;
                     exArr(arr2) : isSameTypes(arr1[0], arr2[0]);
                 }
             }
@@ -202,6 +220,7 @@ expression2i(expr : VMExpression, vars : Tree<string, Value>) -> int{
 value2str(value : Value) -> string {
     switch (value) {
         exInt(val) : i2s(val);
+        exBool(val) : b2s(val);
         exArr(arr) : array2str(arr, value2str);
     }
 }
@@ -209,6 +228,7 @@ value2str(value : Value) -> string {
 checkValueOnArray(value : Value, errorMessage : string) -> exArr{
     switch (value) {
         exInt(v) : fail0(errorMessage);
+        exBool(v) : fail0(errorMessage);
         exArr(a) : value;
     }
 }
@@ -216,6 +236,7 @@ checkValueOnArray(value : Value, errorMessage : string) -> exArr{
 checkValueOnInt(value : Value, errorMessage : string) -> exInt{
     switch (value) {
         exInt(v) : value;
+        exBool(v) : fail0(errorMessage);
         exArr(a) : fail0(errorMessage);
     }
 }

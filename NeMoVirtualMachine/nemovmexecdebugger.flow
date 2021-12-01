@@ -17,6 +17,7 @@ printVarTree(vars : Tree<string, Value>, title : string) -> void{
 val2str(value : Value) -> string {
     switch (value) {
         exInt(val) : i2s(val);
+        exBool(val) : b2s(val);
         exArr(arr) : array2str(arr, val2str);
     }
 }
