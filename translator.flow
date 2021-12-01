@@ -28,6 +28,9 @@ type2vmtype(type: Type) -> VMType{
         Int(): {
             VMInt();
         }
+        Bool(): {
+            VMBool();
+        }
         Array(t): {
             VMArray(type2vmtype(t));
         }
@@ -101,6 +104,9 @@ expr2vmexpr(expr : Expression) -> VMExpression {
         }
         IntExpr(value): {
             VMIntExpr(value);
+        }
+        BoolExpr(value): {
+            VMBoolExpr(value);
         }
     }
 }
