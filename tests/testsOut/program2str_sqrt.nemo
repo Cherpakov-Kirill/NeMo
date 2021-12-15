@@ -1,0 +1,8 @@
+VAR input : INT;
+VAR degree : INT;
+VAR delta : INT;
+(input := 121; degree := 0; delta := 1; (*(((input >= delta)?; (input := (input - delta); delta := (delta + 2); degree := (degree + 1))
+)
+)
+; (input < delta)?)
+; print(degree))
