@@ -1,3 +1,15 @@
-VAR y : BOOL;
-
-y := true
+VAR a : INT;
+VAR b: INT;
+VAR c: INT;
+(
+    a := 1;
+    b := 2;
+    if (a == 0) {
+        a := 3
+    }  
+    else {
+        a := 2
+    }; 
+    c := 3;
+    print(a)
+)

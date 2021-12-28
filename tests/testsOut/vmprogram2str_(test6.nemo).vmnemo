@@ -1,2 +1,13 @@
-VAR y : BOOL;
-0: y := true goto {1}
+VAR a : INT;
+VAR b : INT;
+VAR c : INT;
+0: a := 1 goto {1}
+1: b := 2 goto {2}
+2: if (0 == 0) then {3, 6} else {}
+3: if (a == 0) then {4} else {}
+4: a := 3 goto {5}
+5: if (0 == 0) then {8} else {}
+6: if (a != 0) then {7} else {}
+7: a := 2 goto {8}
+8: c := 3 goto {9}
+9: print(a) goto {10}
