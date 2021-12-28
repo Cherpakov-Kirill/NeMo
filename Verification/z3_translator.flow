@@ -1,0 +1,104 @@
+import Verification/specification_nemo;
+
+export{
+    verCond2z3(specProg : SpecifiedProgram, verConds : [Formula], timeout : int) -> string;
+}
+
+verCond2z3(specProg : SpecifiedProgram, verConds : [Formula], timeout : int) -> string{
+    timeoutStr = timeout2z3(timeout);
+	variablesStr = variables2z3(specProg.nemoProg.declarations);
+    typesTree = fold(specProg.nemoProg.declarations, makeTree(), \acc, var ->
+		setTree(acc, var.name, var.type)
+	);
+    verifCondsStr = varifConditions2z3(verConds, typesTree);
+	timeoutStr + "\n" + variablesStr  + "\n" + verifCondsStr;
+}
+
+timeout2z3(timeout : int){
+	"(set-option :timeout " + i2s(timeout) + ")\n"
+}
+
+varifConditions2z3(verConds : [Formula], typesTree : Tree<string, Type>) -> string{
+    foldi(verConds, "", \iter, acc, verCond -> acc + verifCondition2z3(iter, verCond, typesTree) + "\n");
+}
+
+verifCondition2z3(iter : int, verCond : Formula, typesTree : Tree<string, Type>) -> string{
+    formName = "formula" + i2s(iter);
+    "(push)\n" +
+	"(define-fun " + formName + "() Bool " + formula2z3(verCond, typesTree) + ")\n"+
+	"(assert (not " + formName + "))\n" +
+	"(check-sat)\n" +
+	"(pop)\n"
+}
+
+variables2z3(vars : [Variable]) -> string{
+    fold(vars, "", \acc, var -> acc + variable2z3(var) + "\n");
+}
+
+variable2z3(var : Variable) -> string {
+	"(declare-const " + var.name + " " + varType2z3(var.type) + ")"
+}
+
+varType2z3(type : Type) -> string {
+    switch (type : Type) {
+        Int(): {
+            "Int";
+        }
+        Bool(): {
+            "Bool";
+        }
+        Array(t): {
+            "(Array Int " + varType2z3(t) + ")";
+        }
+    }
+}
+
+getVarType(var : VariableTF, typesTree : Tree<string, Type>){
+	eitherMap(lookupTree(typesTree, var.name), varType2z3, "?")
+}
+
+predicate2z3(predicate : string){
+	if(predicate == "==") "="
+	else predicate;
+}
+
+formula2z3(f : Formula, typesTree : Tree<string, Type>) -> string {
+	switch (f) {
+		AndF(leftF, rightF):  "(and " + formula2z3(leftF, typesTree) + " " + formula2z3(rightF, typesTree) + ")";
+		OrF(leftF, rightF):   "(or " + formula2z3(leftF, typesTree) + " " + formula2z3(rightF, typesTree) + ")";
+		ImplicationF(leftF, rightF): "(=> " + formula2z3(leftF, typesTree) + " " + formula2z3(rightF, typesTree) + ")";
+		NotF(form): "(not " + formula2z3(form, typesTree);
+		QuantifierF(quantifier, form):
+			switch(quantifier) {
+				ForAllQF(var): "(forall ((" + var.name + " " + getVarType(var, typesTree) + ")) " + formula2z3(form, typesTree) + ")";
+				ExistsQF(var): "(exists ((" + var.name + " " + getVarType(var, typesTree) + ")) " + var.name + "." + formula2z3(form, typesTree) + ")";
+			}
+		PredicateEF(n, args):
+			if (args == []) {
+				predicate2z3(n);
+			} else {
+				if(n == "!=") {
+					"(not (= " + rtrim2(fold(args, "", \acc, arg -> acc + term2z3(arg) + " ")," ") + "))";
+				} else {
+					"(" + predicate2z3(n) + " " + rtrim2(fold(args, "", \acc, arg -> acc + term2z3(arg) + " ")," ") + ")";
+				}
+			}
+		TrueEF(): "true";
+		FalseEF(): "false";
+	}
+}
+
+operation2z3(op : string) -> string{
+	if (op == "/") "div" else 
+	if (op == "%") "rem" else 
+	if (op == "get") "select" else
+	if (op == "set") "store" else op;
+}
+
+term2z3(t : TermF) -> string {
+	switch (t) {
+		VariableTF(name) : name; 
+		ConstTF(value) : i2s(value);
+		FunctionTF(op, args):  "(" + operation2z3(op) + " " + rtrim2(fold(args, "", \acc, arg -> acc + term2z3(arg) + " ")," ") + ")";
+	}
+}

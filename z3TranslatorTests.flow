@@ -1,0 +1,17 @@
+import specNemoParserTests;
+import verificationCondTests;
+import fileUtils;
+import Verification/z3_translator;
+
+launchZ3Test(filename : string) -> string{
+    println("\nlaunchNemoExecTest");
+    specNemoProg = launchSpecNemoTest(filename);
+    conditions = generateCondTest(specNemoProg);
+    z3Prog = verCond2z3(specNemoProg, conditions, 10000);
+    putCode("./tests/testsOut/" + "z3_(" + filename + ").z3", z3Prog);
+    z3Prog;
+}
+
+main(){
+    z3Prog1 = launchZ3Test("sqrt.snemo");
+}

@@ -1,14 +1,14 @@
-VAR input : INT;
-VAR degree : INT;
-VAR delta : INT;
-0: input := 121 goto {1}
-1: degree := 0 goto {2}
-2: delta := 1 goto {3}
-3: if (0 == 0) then {4, 9} else {}
-4: if (input >= delta) then {5} else {}
-5: input := (input - delta) goto {6}
-6: delta := (delta + 2) goto {7}
-7: degree := (degree + 1) goto {8}
-8: if (0 == 0) then {3} else {}
-9: if (input < delta) then {10} else {}
-10: print(degree) goto {11}
+VAR n : INT;
+VAR x : INT;
+VAR y : INT;
+0: n := 122 goto {1}
+1: y := 0 goto {2}
+2: x := 1 goto {3}
+3: if (0 == 0) then {4, 8} else {}
+4: if (y <= n) then {5} else {}
+5: y := (y + (x + (x + 1))) goto {6}
+6: x := (x + 1) goto {7}
+7: if (0 == 0) then {3} else {}
+8: if (y > n) then {9} else {}
+9: x := (x - 1) goto {10}
+10: print(x) goto {11}

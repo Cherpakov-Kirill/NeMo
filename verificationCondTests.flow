@@ -1,0 +1,28 @@
+import specNemoParserTests;
+import Verification/conditionsGenerator;
+export {
+    generateCondTest(specNemoProg : SpecifiedProgram)-> [Formula];
+    launchVerCondTest(filename : string) -> [Formula];
+}
+
+
+generateCondTest(specNemoProg : SpecifiedProgram)-> [Formula]{
+    println("generateVerificationConditions(specNemoProg : SpecifiedProgram)");
+    conditions = generateVerificationConditions(specNemoProg);
+    str = foldi(conditions,"",\index, acc, cond ->{
+        acc + i2s(index) + " condition: " + formula2s(cond) + "\n";
+    });
+    //str = strGlue(map(conditions, formula2s),"\n");
+    println(str);
+    conditions;
+}
+
+launchVerCondTest(filename : string) -> [Formula]{
+    println("\nlaunchNemoExecTest");
+    specNemoProg = launchSpecNemoTest(filename);
+    generateCondTest(specNemoProg);
+}
+
+/*main(){
+    conds1 = launchVerCondTest("sqrt.snemo");
+}*/

@@ -34,7 +34,9 @@ export {
     
     program2str(program: Program) -> string;
     addEndOfLine(str : string) -> string;
+    variables2str(vars : [Variable]) -> string;
     variable2str(vars : Variable) -> string;
+    progBody2str(body : Body) -> string;
     expression2str(expr : Expression) -> string;
     
 

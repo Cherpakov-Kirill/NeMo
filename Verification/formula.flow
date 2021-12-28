@@ -1,12 +1,10 @@
 import string;
 
 export {
-    FuncDefenition(arguments : [string], funcBody : TermF);
-    FormDefenition(arguments : [string], formBody : Formula);
-
-    TermF ::= VariableTF, FunctionTF;
+    TermF ::= VariableTF, ConstTF, FunctionTF;
         VariableTF(name : string);
-        FunctionTF(name : string, arguments : [TermF]);
+		ConstTF(value : int);
+		FunctionTF(op : string, arguments : [TermF]);
 
     Formula ::= ElementaryF, AndF, OrF, ImplicationF, NotF, QuantifierF;
         ElementaryF ::= PredicateEF, TrueEF, FalseEF;
@@ -24,6 +22,7 @@ export {
 
     formula2s(f : Formula) -> string;
     term2s(t : TermF) -> string;
+	replacingVariableInFormula(form : Formula, variable : string, term : TermF) -> Formula;
 }
 
 formula2s(f : Formula) -> string {
@@ -48,7 +47,29 @@ formula2s(f : Formula) -> string {
 
 term2s(t : TermF) -> string {
 	switch (t) {
-		VariableTF(name): name; 
-		FunctionTF(name, args): name + "(" + rtrim2(fold(args, "", \acc, arg -> acc + term2s(arg) + ", "),", ") + ")";
+		VariableTF(name) : name; 
+		ConstTF(value) : i2s(value);
+		FunctionTF(op, args): op + "(" + rtrim2(fold(args, "", \acc, arg -> acc + term2s(arg) + ", "),", ") + ")";
+	}
+}
+
+replacingVariableInFormula(form : Formula, variable : string, term : TermF) -> Formula {
+	switch (form) {
+		AndF(left, right):  AndF(replacingVariableInFormula(left, variable, term), replacingVariableInFormula(right, variable, term));
+		OrF(left, right):   OrF(replacingVariableInFormula(left, variable, term), replacingVariableInFormula(right, variable, term));
+		ImplicationF(left, right): ImplicationF(replacingVariableInFormula(left, variable, term), replacingVariableInFormula(right, variable, term));
+		NotF(formula):      NotF(replacingVariableInFormula(formula, variable, term));
+		QuantifierF(quantifier, formula): QuantifierF(quantifier, replacingVariableInFormula(formula, variable, term));
+		PredicateEF(name, args): PredicateEF(name, map(args, \a -> replacingVariableInTerm(a, variable, term)));
+		TrueEF():  form;
+		FalseEF(): form;
+	}
+}
+
+replacingVariableInTerm(t : TermF, variable : string, term : TermF) -> TermF {
+	switch (t) {
+		VariableTF(name): if (name == variable) term else t;
+		ConstTF(value): t;
+		FunctionTF(op, arguments): FunctionTF(op, map(arguments, \arg -> replacingVariableInTerm(arg, variable, term)));
 	}
 }

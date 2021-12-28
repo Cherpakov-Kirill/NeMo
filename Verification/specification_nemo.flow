@@ -1,0 +1,127 @@
+import lingo/pegcode/driver;
+import NeMo/nemo;
+import Verification/formula;
+
+export {
+    SpecifiedProgram(
+            nemoProg : Program, 
+            beforeCond : Formula, 
+            afterCond : Formula, 
+            invariants : Tree<Loop, Formula>
+    );
+
+    str2specProgram(program: string) -> Maybe<SpecifiedProgram>;
+    specProg2s(specProg : SpecifiedProgram) -> string;
+    expression2term(expr : Expression) -> TermF;
+}
+
+expression2term(expr : Expression) -> TermF {
+	switch (expr) {
+		MathOpExpr(op, left, right):        FunctionTF(op, [expression2term(left), expression2term(right)]);
+		ArSetValExpr(arr, index, value):    FunctionTF("set", [expression2term(arr), expression2term(index), expression2term(value)]);
+		ArGetValExpr(arr, index):           FunctionTF("get", [expression2term(arr), expression2term(index)]);
+        ArLenExpr(arr):                     FunctionTF("len", [expression2term(arr)]);
+		VarExpr(name):                      VariableTF(name);
+		IntExpr(value):                     ConstTF(value);
+        BoolExpr(value): {
+            if(value == true){
+                FunctionTF("true", []);
+            } else{
+                FunctionTF("false", []);
+            }
+        }
+	}
+}
+
+makeEquivalence(fl: [flow]) -> AndF{
+    AndF(ImplicationF(fl[0], fl[1]),ImplicationF(fl[1], fl[0]));
+}
+
+makeBinaryPredicate(fl: [flow]) -> PredicateEF{
+    PredicateEF(fl[0], [fl[1], fl[2]]);
+}
+
+makeVarPredicate(fl: [flow]) -> PredicateEF{
+    PredicateEF(fl[0], []);
+}
+
+makeMathTerm(fl: [flow]) -> FunctionTF{
+    FunctionTF(fl[0], [fl[1], fl[2]]);
+}
+
+str2specProgram(program: string) -> Maybe<SpecifiedProgram> {
+    invariants = ref makeTree();
+    treeSequence = setTree(defaultPegActions.t, "makeSequence", makeSequence);
+    treeChoice = setTree(treeSequence, "makeChoise", makeChoise);
+    treeLoop = setTree(treeChoice,"makeSpecLoop", \fl ->{
+        loop = Loop(fl[0]);
+        invariants := setTree(^invariants, loop, fl[1]);
+        loop;
+    });
+    treeIf = setTree(treeLoop, "makeIfElse", makeIfElse);
+    treeWhile = setTree(treeIf, "makeSpecWhile", \fl ->{
+        leftExpr = fl[0];
+        cond = fl[1];
+        rightExpr = fl[2]; 
+        body = fl[3];
+        loop = Loop(Sequence([Test(cond, leftExpr, rightExpr), body]));
+        invariants := setTree(^invariants, loop, fl[4]);
+        Sequence([
+            loop,
+            Test(reverseCondition(cond), leftExpr, rightExpr)
+        ]);
+    });
+    treeBool = setTree(treeWhile, "makeBool", makeBool);
+    treeMinusInt = setTree(treeBool, "makeMinusInt", makeMinusInt);
+    binaryPredicateTree = setTree(treeMinusInt, "makeBinaryPredicate", makeBinaryPredicate);
+    varPredicateTree = setTree(binaryPredicateTree, "makeVarPredicate", makeVarPredicate);
+    mathTermTree = setTree(varPredicateTree, "makeMathTerm", makeMathTerm);
+    equivalenceTree = setTree(mathTermTree, "makeEquivalence", makeEquivalence);
+    fullThree = setTree(equivalenceTree, "makeSpecProgram", \fl -> {
+        SpecifiedProgram(Program(fl[0],fl[1]), fl[2], fl[3], ^invariants);
+    });
+    pegActions = SemanticActions(fullThree);
+    grammar = "#include Verification/specification_nemo.lingo";
+    ret = parsic3(compilePegGrammar(grammar), program, pegActions, SpecifiedProgram(Program([],Print(IntExpr(0))), FalseEF(), FalseEF(), makeTree()));
+    //println(ret.first);
+    if(ret.third==""){
+        Some(ret.first);
+    }else{
+        None();
+    }
+}
+
+specProg2s(specProg : SpecifiedProgram) -> string {
+    variables2str(specProg.nemoProg.declarations) +
+	"{ " + formula2s(specProg.beforeCond) + " }\n" +
+	specProgBody2str(specProg.nemoProg.body, specProg.invariants) + "\n"
+	"{ " + formula2s(specProg.afterCond) + " }\n"
+}
+
+specProgBody2str(body : Body, invariants : Tree<Loop, Formula>) -> string {
+    switch (body) {
+        Assign(var, value): {
+            var + " := " + expression2str(value);
+        }
+        Test(operation, leftExpr, rightExpr): {
+            addEndOfLine("(" + expression2str(leftExpr) + " " + operation + " " + expression2str(rightExpr) + ")?");
+        }
+        Sequence(bodies): {
+            addEndOfLine("(" + rtrim2(fold(bodies, "", \acc, body_i -> acc + specProgBody2str(body_i, invariants) + "; "),"; ") + ")");
+        }             
+        Choice(bodies): {
+            addEndOfLine("(" + rtrim2(fold(bodies, "", \acc, body_i -> acc + specProgBody2str(body_i, invariants) + " U ")," U ") + ")");
+        }                
+        Loop(progBody): {
+            addEndOfLine(
+                switch (lookupTree(invariants, body)) {
+				    Some(inv): "*" + " { " + formula2s(inv) + " } (" + specProgBody2str(progBody, invariants)  + ")";
+				    None(): "*("  + specProgBody2str(progBody, invariants) + ")";
+                }
+            );
+        }                       
+        Print(expr): {
+            addEndOfLine("print(" + expression2str(expr) + ")");
+        }
+    }
+}

@@ -1,0 +1,61 @@
+import runtime;
+import Verification/specification_nemo;
+import fileUtils;
+
+export {
+    launchSpecNemoTest(filename : string) -> SpecifiedProgram;
+}
+
+parseSpecNemoProgram(code : string, testTitle : string) -> SpecifiedProgram{
+    println("str2specProgram " + testTitle);
+    switch (str2specProgram(code) : Maybe<SpecifiedProgram>) {
+        Some(prog):{
+            println("str2specProgram(fileContent : string)");
+            println(prog);
+            println("");
+            prog;
+        }
+        None():{
+            println("ParserError: " + testTitle);
+            SpecifiedProgram(Program([],Print(IntExpr(0))),FalseEF(), FalseEF(), makeTree());     
+        }
+    }
+}
+
+/*program2str2program(prog : Program, testTitle : string, filename : string) -> Program{
+    println("scpeProgram2file2specProgram " + testTitle);
+    println("specProg2s(specNeMoProg : SpecifiedProgram)");
+    progStr = specProg2s(prog);
+    println(progStr);
+    println("");
+    putCode("./tests/testsOut/" + "specProgram2str_" + filename, progStr);
+    println("");
+    parseSpecNemoProgram(progStr, testTitle);
+}*/
+
+launchSpecNemoTest(filename : string) -> SpecifiedProgram{
+    println("\nlaunchSpecNemoTest");
+    fileIn = "./tests/testsIn/" + filename;
+    testCode = getCode(fileIn);
+    specNemoProg = parseSpecNemoProgram(testCode, "string -> SpecNemo");
+    if(specNemoProg != SpecifiedProgram(Program([],Print(IntExpr(0))),FalseEF(), FalseEF(), makeTree())){
+        println("specProg2s(specNeMoProg : SpecifiedProgram)");
+        progStr = specProg2s(specNemoProg);
+        println(progStr);
+        println("");
+        putCode("./tests/testsOut/" + "specifiedProgramProgram2str_" + filename, progStr);
+        println("");
+        /*progFromStrFromProg = program2str2program(nemoProg, "SpecifiedNemo -> string -> SpecifiedNemo", filename);
+        if(nemoProg == progFromStrFromProg) {
+            println("Seccessful: SpecifiedNemo -> string -> SpecifiedNemo");
+        } else {
+            println("Error: SpecifiedNemo -> string -> SpecifiedNemo");
+        }*/
+    }
+    println("");
+    specNemoProg;
+}
+
+/*main(){
+    sqrt = launchSpecNemoTest("sqrt.snemo");
+}*/

@@ -1,0 +1,57 @@
+import Verification/specification_nemo;
+
+export {
+    VerificationConditions(
+	    specifiedCond : Formula,
+	    verificationCond : Set<Formula>
+    );
+    generateVerificationConditions(specProg : SpecifiedProgram) -> [Formula];
+}
+
+generateVerificationConditions(specProg : SpecifiedProgram) -> [Formula]{
+    verifCondForBody = genVerifCondForBody(specProg.afterCond, specProg.nemoProg.body, specProg.invariants);
+	concat([ImplicationF(specProg.beforeCond, verifCondForBody.specifiedCond)], set2array(verifCondForBody.verificationCond))
+}
+
+genVerifCondForBody(form : Formula, progBody : Body, invariants : Tree<Loop, Formula>) -> VerificationConditions {
+	switch (progBody) {
+		Assign(var, val):
+			VerificationConditions(replacingVariableInFormula(form, var, expression2term(val)), makeSet());
+		Test(op, left, right): 
+			VerificationConditions(ImplicationF(PredicateEF(op, [expression2term(left), expression2term(right)]), form), makeSet());
+		Sequence(bodies): 
+			fold(reverseA(bodies), VerificationConditions(form, makeSet()), \acc, body -> {
+				verifCondForBody = genVerifCondForBody(acc.specifiedCond, body, invariants);
+				VerificationConditions(
+					verifCondForBody.specifiedCond,
+					mergeSets(acc.verificationCond, verifCondForBody.verificationCond)
+				)
+			});
+		Choice(bodies):
+			fold(bodies, VerificationConditions(TrueEF(), makeSet()), \acc, body -> {
+				verifCondForBody = genVerifCondForBody(form, body, invariants);
+				VerificationConditions(
+					AndF(acc.specifiedCond, verifCondForBody.specifiedCond),
+					mergeSets(acc.verificationCond, verifCondForBody.verificationCond)
+				)
+			});
+		Loop(loopBody): {
+			switch (lookupTree(invariants, progBody)) {
+				Some(invariant): {
+					verifCondForBody = genVerifCondForBody(invariant, loopBody, invariants);
+					VerificationConditions(invariant, 
+						insertSet(
+							insertSet(verifCondForBody.verificationCond, ImplicationF(invariant, form)),
+							ImplicationF(invariant, verifCondForBody.specifiedCond  )
+						)
+					);
+				}
+				None(): {
+					println("VirificationCond Generator Error: " + progBody2str(progBody) + " is not spicified");
+					VerificationConditions(FalseEF(), makeSet());
+				}
+			}
+		}
+		Print(e): VerificationConditions(form, makeSet());
+	}
+}
