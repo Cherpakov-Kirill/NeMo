@@ -43,7 +43,7 @@ launchSpecNemoTest(filename : string) -> SpecifiedProgram{
         progStr = specProg2s(specNemoProg);
         println(progStr);
         println("");
-        putCode("./tests/testsOut/" + "specifiedProgramProgram2str_" + filename, progStr);
+        putCode("./tests/testsOut/" + "specifiedProgram2str_" + filename, progStr);
         println("");
         /*progFromStrFromProg = program2str2program(nemoProg, "SpecifiedNemo -> string -> SpecifiedNemo", filename);
         if(nemoProg == progFromStrFromProg) {
