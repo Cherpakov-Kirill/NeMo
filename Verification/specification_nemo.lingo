@@ -25,8 +25,8 @@ term =
     variableName:n 													{VariableTF(:n)};
 
 quantifier =
-	"∀" sp nameF:v {ForAllQF(:v)} |
-	"∃" sp nameF:v {ExistsQF(:v)};
+	"∀" sp nameF:v {ForAllQF(VariableTF(:v))} |
+	"∃" sp nameF:v {ExistsQF(VariableTF(:v))};
 
 variableType = int | bool | array;
 int = "INT" sp                      {Int()};

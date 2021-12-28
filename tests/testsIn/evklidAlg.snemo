@@ -1,0 +1,80 @@
+VAR a: INT;
+VAR b: INT;
+VAR x: INT;
+VAR y: INT;
+VAR t: INT;
+VAR z: INT;
+VAR s: INT;
+
+{ ((a = x) & (b = y)) }
+(
+    while (a != b) invariant { 
+        ∀ z (
+            (
+                (a > 0) & 
+                ((b > 0) & 
+                    ((z > 0) & 
+                        (∃ t (b = (t * z)) & 
+                            (∃ t (a = (t * z)) & ∀ s 
+                                (
+                                    (
+                                        ∃ t (a = (t * s)) 
+                                        & ∃ t (b = (t * s))
+                                    ) 
+                                    -> (s <= z)
+                                )
+                            )
+                        )
+                    )
+                )      
+            )       
+            <-> 
+            (
+                (x > 0) & 
+                ((y > 0) & 
+                    ((z > 0) & 
+                        (∃ t (y = (t * z)) & 
+                            (∃ t (x = (t * z)) & ∀ s 
+                                (
+                                    (
+                                        ∃ t (x = (t * s)) 
+                                        & ∃ t (y = (t * s))
+                                    ) 
+                                    -> (s <= z)
+                                )
+                            )
+                        )
+                    )
+                )      
+            )
+        )
+     } {
+      if (a > b){
+            a := (a - b)
+        } 
+        else { 
+            b := (b - a)
+        }
+	};
+    print(a)
+)
+{ 
+    (
+        (a > 0) & 
+        ((b > 0) & 
+            ((z > 0) & 
+                (∃ t (b = (t * z)) & 
+                    (∃ t (a = (t * z)) & ∀ s 
+                        (
+                            (
+                                ∃ t (a = (t * s)) 
+                                & ∃ t (b = (t * s))
+                            ) 
+                            -> (s <= z)
+                        )
+                    )
+                )
+            )
+        )      
+    )                    
+}

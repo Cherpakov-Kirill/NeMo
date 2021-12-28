@@ -71,7 +71,7 @@ formula2z3(f : Formula, typesTree : Tree<string, Type>) -> string {
 		QuantifierF(quantifier, form):
 			switch(quantifier) {
 				ForAllQF(var): "(forall ((" + var.name + " " + getVarType(var, typesTree) + ")) " + formula2z3(form, typesTree) + ")";
-				ExistsQF(var): "(exists ((" + var.name + " " + getVarType(var, typesTree) + ")) " + var.name + "." + formula2z3(form, typesTree) + ")";
+				ExistsQF(var): "(exists ((" + var.name + " " + getVarType(var, typesTree) + ")) " + formula2z3(form, typesTree) + ")";
 			}
 		PredicateEF(n, args):
 			if (args == []) {
