@@ -1,0 +1,78 @@
+program = sp declaration*:d sp 
+            formDef*:formArr sp
+            funcDef*:funcArr sp
+            "{" sp formula:beforeCond sp "}" sp 
+            programBody:b sp
+            "{" sp formula:afterCond sp "}" sp                          {makeAnnotProgram(:d, :formArr, :funcArr, :b, :beforeCond, :afterCond)};
+
+declaration = "VAR" sp variableName:n sp ":" sp variableType:t ";" sp   {Variable(:n, :t)};
+
+formDef = "formula" sp nameF:name "(" sp arg*:args ")" sp formula:body sp  {makeFormDefenition(:name, :args, :body)};
+funcDef = "function" sp nameF:name "(" sp arg*:args ")" sp term:body sp  {makeFuncDefenition(:name, :args, :body)};
+arg = nameF $s ("," sp)? { $s };
+nameF = letter+$s {$s};
+
+
+formula = 
+	"(" sp formula:left "&"   sp formula:right ")" sp       {AndF(:left, :right)} |
+	"(" sp formula:left "V"   sp formula:right ")" sp       {OrF(:left, :right)} |
+	"(" sp formula:left "->"  sp formula:right ")" sp       {ImplicationF(:left, :right)} |
+	"(" sp formula:left "<->" sp formula:right ")" sp       {makeEquivalence(:left, :right)} |
+	"¬ " sp formula:form                                    {NotF(:form)} |
+	quantifier:q "." sp formula:form                        {QuantifierF(:q, :form)} |
+	"true" sp                                               {TrueEF()} |
+	"false" sp                                              {FalseEF()} |
+	nameF:name terms:ts                                     {PredicateEF(:name, :ts)} |
+	"(" sp term:t1 ( condition | "=" ) $s sp term:t2 ")" sp {makeBinaryPredicate($s, :t1, :t2)} |
+	nameF:name                                              {makeVarPredicate(:name)};
+
+term = 
+	"(" sp term:t1 math $o sp term:t2 ")" sp                {createMathTerm($o, :t1, :t2)} |
+	nameF:name terms:ts                                     {FunctionTF(:name, :ts)} |
+    varF;
+
+terms = "(" sp term:t1 sequenceTerm*:ts ")" sp              {makeTerms(:t1, :ts)};
+    sequenceTerm = "," sp term;
+
+quantifier =
+	"∀" sp nameF:v {ForAllQF(:v)} |
+	"∃" sp nameF:v {ExistsQF(:v)};
+
+varF = variableName:n { VariableTF(:n) };
+
+variableType = int | bool | array;
+int = "INT" sp                      {Int()};
+bool = "BOOL" sp                      {Bool()};
+array = "[" variableType:t "]" sp   {Array(:t)};
+
+programBody = assign | test | sequence | choice | loop | print | ifelse | while;
+assign = sp variableName:name sp ":=" sp expression:expr sp                               {Assign(:name, :expr)};
+test = sp "(" sp expression:left sp condition$cond sp expression:right sp ")?" sp       {Test($cond, :left, :right)};
+sequence = sp "(" programBody:body sequenceBody*:arrBodies ")" sp                       {makeSequence(:body, :arrBodies)};
+    sequenceBody = ";" sp programBody;
+choice = sp "(" programBody:body choiseBody*:arrBodies ")" sp                           {makeChoise(:body, :arrBodies)}; 
+    choiseBody = "U" sp programBody;
+loop = sp "*" sp "{" formula:inv "}" sp "(" sp programBody:body sp ")" sp               {makeAnnotLoop(:body, :inv)};
+print = sp "print" "(" sp expression:expr sp ")" sp                                     {Print(:expr)};
+ifelse = sp "if" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "{" sp programBody:ifBody sp "}" sp  "else" sp "{" sp programBody:elseBody sp "}" {makeIfElse(:left, $cond, :right, :ifBody, :elseBody)};
+while  = sp "while" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "inv" "{" formula:inv "}" sp "{" sp programBody:body sp "}" sp {makeAnnotWhile(:left, $cond, :right, :body, :inv)};
+
+expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | minusInt | intExpr | boolExpr | varExpr;
+mathOpExpr = "(" sp expression:l math $o sp expression:r ")" sp                                             {MathOpExpr($o, :l, :r)};
+arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {ArSetValExpr(:arr, :index, :var)};
+arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {ArGetValExpr(:arr, :index)};
+arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                                                         {ArLenValExpr(:arr)};
+varExpr = sp letter+$l sp                                                                                   {VarExpr($l)};
+minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusInt(s2i(:v))};
+intExpr = sp digit+$v sp                                                                                    {IntExpr(s2i(:v))};
+boolExpr = sp ("true" | "false")$boolVal sp                                                                 {makeBool($boolVal)};
+
+condition   = "!=" | "==" | "<=" | ">=" | "<" | ">" ;
+math = "+" | "*" | "/" | "-" | "%";
+
+sp = (' ' | '\t' | '\n' | '\r')*;
+variableName = letter+$s {$s};
+letter = 'a'-'z';
+digit  = '0'-'9';
+
+

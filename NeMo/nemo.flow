@@ -29,7 +29,21 @@ export {
     BoolExpr(value : bool);
 
     str2program(program: string) -> Maybe<Program>;
+
+    reverseCondition(cond : string) -> string;
+    
     program2str(program: Program) -> string;
+    addEndOfLine(str : string) -> string;
+    variable2str(vars : Variable) -> string;
+    expression2str(expr : Expression) -> string;
+    
+
+    makeSequence(bodies: [flow]) -> Sequence;
+    makeChoise(bodies: [flow]) -> Choice;
+    makeIfElse(bodies: [flow]) -> Choice;
+    makeWhile(bodies: [flow]) -> Sequence;
+    makeBool(bodies: [flow]) -> BoolExpr;
+    makeMinusInt(bodies: [flow]) -> IntExpr;
 }
 
 makeSequence(bodies: [flow]) -> Sequence{

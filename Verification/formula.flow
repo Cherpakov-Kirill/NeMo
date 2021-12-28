@@ -1,0 +1,54 @@
+import string;
+
+export {
+    FuncDefenition(arguments : [string], funcBody : TermF);
+    FormDefenition(arguments : [string], formBody : Formula);
+
+    TermF ::= VariableTF, FunctionTF;
+        VariableTF(name : string);
+        FunctionTF(name : string, arguments : [TermF]);
+
+    Formula ::= ElementaryF, AndF, OrF, ImplicationF, NotF, QuantifierF;
+        ElementaryF ::= PredicateEF, TrueEF, FalseEF;
+            PredicateEF(name : string, arguments : [TermF]);
+            TrueEF();
+            FalseEF();            
+        AndF(leftFormula : Formula, rightFormula : Formula);
+        OrF(leftFormula : Formula, rightFormula : Formula);
+        ImplicationF(ifFormula : Formula, thenFormula : Formula);
+        NotF(formula : Formula);
+        QuantifierF(quantifier : Quantifier, formula : Formula);
+            Quantifier ::= ForAllQF, ExistsQF;
+                ForAllQF(variable: VariableTF);
+                ExistsQF(variable: VariableTF);
+
+    formula2s(f : Formula) -> string;
+    term2s(t : TermF) -> string;
+}
+
+formula2s(f : Formula) -> string {
+	switch (f) {
+		AndF(leftF, rightF):  "(" + formula2s(leftF) + " & " + formula2s(rightF) + ")";
+		OrF(leftF, rightF):   "(" + formula2s(leftF) + " V " + formula2s(rightF) + ")";
+		ImplicationF(leftF, rightF): "(" + formula2s(leftF) + " -> " + formula2s(rightF) + ")";
+		NotF(form): "¬ " + formula2s(form);
+		QuantifierF(quantifier, form):
+			switch(quantifier) {
+				ForAllQF(var): "∀" + var.name + "." + formula2s(form);
+				ExistsQF(var): "∃" + var.name + "." + formula2s(form);
+			}
+		PredicateEF(n, args):
+			if (args == []) n else {
+				n + "(" + rtrim2(fold(args, "", \acc, arg -> acc + term2s(arg) + ", "),", ") + ")";
+			}
+		TrueEF(): "true";
+		FalseEF(): "false";
+	}
+}
+
+term2s(t : TermF) -> string {
+	switch (t) {
+		VariableTF(name): name; 
+		FunctionTF(name, args): name + "(" + rtrim2(fold(args, "", \acc, arg -> acc + term2s(arg) + ", "),", ") + ")";
+	}
+}
