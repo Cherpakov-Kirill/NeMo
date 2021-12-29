@@ -22,6 +22,9 @@ formula =
 term = 
 	digit+$v                                    					{ConstTF(s2i($v))} |
 	"(" sp term:t1 sp math $o sp term:t2 ")" sp                    	{makeMathTerm($o, :t1, :t2)} |
+	"(" sp "set" "(" sp term:arr "," sp term:index "," sp term:var sp ")" sp ")" sp {makeSetTerm("set", :arr, :index, :var)} |
+	"(" sp "get" "(" sp term:arr "," sp term:index sp ")" sp ")" sp {makeGetTerm("get", :arr, :index)} |
+	"(" sp "len" "(" sp term:arr sp ")" sp ")" sp {makeLenTerm("len", :arr)} |
     variableName:n 													{VariableTF(:n)};
 
 quantifier =
@@ -34,7 +37,7 @@ bool = "BOOL" sp                      {Bool()};
 array = "[" variableType:t "]" sp   {Array(:t)};
 
 programBody = assign | test | sequence | choice | loop | print | ifelse | while;
-assign = sp variableName:name sp ":=" sp expression:expr sp                               {Assign(:name, :expr)};
+assign = sp variableName:name sp ":=" sp expression:expr sp                             {Assign(:name, :expr)};
 test = sp "(" sp expression:left sp condition$cond sp expression:right sp ")?" sp       {Test($cond, :left, :right)};
 sequence = sp "(" programBody:body sequenceBody*:arrBodies ")" sp                       {makeSequence(:body, :arrBodies)};
     sequenceBody = ";" sp programBody;
@@ -46,10 +49,10 @@ ifelse = sp "if" sp "(" sp expression:left sp condition$cond sp expression:right
 while  = sp "while" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "invariant" sp "{" sp formula:inv sp "}" sp "{" sp programBody:body sp "}" sp {makeSpecWhile(:left, $cond, :right, :body, :inv)};
 
 expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | minusInt | intExpr | boolExpr | varExpr;
-mathOpExpr = "(" sp expression:l math $o sp expression:r ")" sp                                             {MathOpExpr($o, :l, :r)};
-arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {ArSetValExpr(:arr, :index, :var)};
-arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {ArGetValExpr(:arr, :index)};
-arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                                                         {ArLenValExpr(:arr)};
+mathOpExpr = "(" sp expression:l sp math $o sp expression:r sp ")" sp                                             {MathOpExpr($o, :l, :r)};
+arSetValExpr = "(" sp "set" "(" sp varExpr:arr "," sp expression:index "," sp expression:var sp ")" sp ")"        {ArSetValExpr(:arr, :index, :var)};
+arGetValExpr = "(" sp "get" "(" sp varExpr:arr "," sp expression:index sp ")" sp ")"                              {ArGetValExpr(:arr, :index)};
+arLenExpr = "(" sp "len" "(" sp varExpr:arr sp ")" sp ")"                                                         {ArLenExpr(:arr)};
 varExpr = sp letter+$l sp                                                                                   {VarExpr($l)};
 minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusInt(s2i(:v))};
 intExpr = sp digit+$v sp                                                                                    {IntExpr(s2i(:v))};

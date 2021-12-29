@@ -21,10 +21,10 @@ ifelse = sp "if" sp "(" sp expression:left sp condition$cond sp expression:right
 while  = sp "while" sp "(" sp expression:left sp condition$cond sp expression:right sp ")" sp "{" sp programBody:body sp "}" sp {makeWhile(:left, $cond, :right, :body)};
 
 expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | minusInt | intExpr | boolExpr | varExpr;
-mathOpExpr = "(" sp expression:l ("+"|"*"|"/"|"-"|"%")$o sp expression:r ")" sp                             {MathOpExpr($o, :l, :r)};
-arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {ArSetValExpr(:arr, :index, :var)};
-arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {ArGetValExpr(:arr, :index)};
-arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                                                         {ArLenValExpr(:arr)};
+mathOpExpr = "(" sp expression:l sp ("+"|"*"|"/"|"-"|"%")$o sp expression:r sp ")" sp                             {MathOpExpr($o, :l, :r)};
+arSetValExpr = "(" sp "set" "(" sp varExpr:arr "," sp expression:index "," sp expression:var sp ")" sp ")"        {ArSetValExpr(:arr, :index, :var)};
+arGetValExpr = "(" sp "get" "(" sp varExpr:arr "," sp expression:index sp ")" sp ")"                              {ArGetValExpr(:arr, :index)};
+arLenExpr = "(" sp "len" "(" sp varExpr:arr sp ")" sp ")"                                                         {ArLenExpr(:arr)};
 varExpr = sp letter+$l sp                                                                                   {VarExpr($l)};
 minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusInt(s2i(:v))};
 intExpr = sp digit+$v sp                                                                                    {IntExpr(s2i(:v))};

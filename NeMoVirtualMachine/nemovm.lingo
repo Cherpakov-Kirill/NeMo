@@ -19,10 +19,10 @@ intArray = labelNumbers*:arrLabels labelNumber?:l   {concat(:arrLabels, :l)};
     labelNumber = digit+$l {s2i($l)};
 
 expression = mathOpExpr | arSetValExpr | arGetValExpr | arLenExpr | minusInt | intExpr | boolExpr | varExpr;
-mathOpExpr = "(" sp expression:l ("+"|"*"|"/"|"-"|"%")$o sp expression:r ")" sp                             {VMMathOpExpr($o, :l, :r)};
-arSetValExpr = "(" sp "set" "(" varExpr:arr "," sp expression:index "," sp expression:var ")" sp ")"        {VMArSetValExpr(:arr, :index, :var)};
-arGetValExpr = "(" sp "get" "(" varExpr:arr "," sp expression:index ")" sp ")"                              {VMArGetValExpr(:arr, :index)};
-arLenExpr = "(" sp "len" "(" varExpr:arr ")" sp ")"                                                         {VMArLenValExpr(:arr)};
+mathOpExpr = "(" sp expression:l sp ("+"|"*"|"/"|"-"|"%")$o sp expression:r sp ")" sp                             {VMMathOpExpr($o, :l, :r)};
+arSetValExpr = "(" sp "set" "(" sp varExpr:arr "," sp expression:index "," sp expression:var sp ")" sp ")"        {VMArSetValExpr(:arr, :index, :var)};
+arGetValExpr = "(" sp "get" "(" sp varExpr:arr "," sp expression:index sp ")" sp ")"                              {VMArGetValExpr(:arr, :index)};
+arLenExpr = "(" sp "len" "(" sp varExpr:arr sp ")" sp ")"                                                         {VMArLenExpr(:arr)};
 varExpr = sp letter+$l sp                                                                                   {VMVarExpr($l)};
 minusInt = sp "-" sp digit+$v sp                                                                            {makeMinusVMInt(s2i(:v))};
 intExpr = sp digit+$v sp                                                                                    {VMIntExpr(s2i(:v))};
