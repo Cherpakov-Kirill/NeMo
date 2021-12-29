@@ -14,5 +14,6 @@ launchZ3Test(filename : string) -> string{
 
 main(){
     //z3Prog1 = launchZ3Test("sqrt.snemo");
-    z3Prog2 = launchZ3Test("evklidAlg.snemo");
+    //z3Prog2 = launchZ3Test("evklidAlg.snemo");
+    z3Prog3 = launchZ3Test("fib.snemo");
 }

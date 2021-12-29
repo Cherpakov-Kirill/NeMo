@@ -49,6 +49,18 @@ makeMathTerm(fl: [flow]) -> FunctionTF{
     FunctionTF(fl[0], [fl[1], fl[2]]);
 }
 
+makeSetTerm(fl: [flow]) -> FunctionTF{
+    FunctionTF(fl[0], [fl[1], fl[2], fl[3]]);
+}
+
+makeGetTerm(fl: [flow]) -> FunctionTF{
+    FunctionTF(fl[0], [fl[1], fl[2]]);
+}
+
+makeLenTerm(fl: [flow]) -> FunctionTF{
+    FunctionTF(fl[0], [fl[1]]);
+}
+
 str2specProgram(program: string) -> Maybe<SpecifiedProgram> {
     invariants = ref makeTree();
     treeSequence = setTree(defaultPegActions.t, "makeSequence", makeSequence);
@@ -76,7 +88,10 @@ str2specProgram(program: string) -> Maybe<SpecifiedProgram> {
     binaryPredicateTree = setTree(treeMinusInt, "makeBinaryPredicate", makeBinaryPredicate);
     varPredicateTree = setTree(binaryPredicateTree, "makeVarPredicate", makeVarPredicate);
     mathTermTree = setTree(varPredicateTree, "makeMathTerm", makeMathTerm);
-    equivalenceTree = setTree(mathTermTree, "makeEquivalence", makeEquivalence);
+    setTermTree = setTree(mathTermTree, "makeSetTerm", makeSetTerm);
+    getTermTree = setTree(setTermTree, "makeGetTerm", makeGetTerm);
+    lenTermTree = setTree(getTermTree, "makeLenTerm", makeLenTerm);
+    equivalenceTree = setTree(lenTermTree, "makeEquivalence", makeEquivalence);
     fullThree = setTree(equivalenceTree, "makeSpecProgram", \fl -> {
         SpecifiedProgram(Program(fl[0],fl[1]), fl[2], fl[3], ^invariants);
     });

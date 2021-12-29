@@ -58,5 +58,6 @@ launchSpecNemoTest(filename : string) -> SpecifiedProgram{
 
 /*main(){
     //sqrt = launchSpecNemoTest("sqrt.snemo");
-    evklid = launchSpecNemoTest("evklidAlg.snemo");
+    //evklid = launchSpecNemoTest("evklidAlg.snemo");
+    fib = launchSpecNemoTest("fib.snemo");
 }*/

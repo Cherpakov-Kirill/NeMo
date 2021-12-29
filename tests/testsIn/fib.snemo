@@ -1,0 +1,46 @@
+VAR n : INT;
+VAR i : INT;
+VAR z : INT;
+VAR array : [INT];
+
+
+{ (n >= 2) }
+(
+    array := (set(array, 0, 0));
+    array := (set(array, 1, 1));
+    i := 2;
+    while (i < n) invariant { 
+        ∀ z (
+            ((1 < z) & (z < i)) 
+            ->
+            (
+                (get(array, z)) == 
+                ((get(array, (z - 1))) + (get(array, (z - 2))))
+            )
+        ) 
+    } 
+    {
+        (
+            array := (
+                set(array, i, 
+                    (
+                        (get(array, (i - 1))) 
+                        + (get(array, (i - 2)))
+                    )
+                )
+            );
+            i := (i + 1)
+        )
+    };
+    print(array)
+)
+{ 
+    ∀ z (
+        ((1 < z) & (z < n)) 
+        ->
+        (
+           (get(array, z)) == 
+            ((get(array, (z - 1))) + (get(array, (z - 2))))
+        )
+    )
+}
