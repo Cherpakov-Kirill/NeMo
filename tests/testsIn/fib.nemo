@@ -1,0 +1,25 @@
+VAR n : INT;
+VAR i : INT;
+VAR array : [INT];
+
+(
+    n := 15;
+    array := (set(array, 0, 0));
+    array := (set(array, 1, 1));
+    i := 2;
+    while (i < n) 
+    {
+        (
+            array := (
+                set(array, i, 
+                    (
+                        (get(array, (i - 1))) 
+                        + (get(array, (i - 2)))
+                    )
+                )
+            );
+            i := (i + 1)
+        )
+    };
+    print(array)
+)

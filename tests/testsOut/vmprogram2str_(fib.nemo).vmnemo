@@ -1,0 +1,14 @@
+VAR n : INT;
+VAR i : INT;
+VAR array : [INT];
+0: n := 15 goto {1}
+1: array := (set(array, 0, 0)) goto {2}
+2: array := (set(array, 1, 1)) goto {3}
+3: i := 2 goto {4}
+4: if (0 == 0) then {5, 9} else {}
+5: if (i < n) then {6} else {}
+6: array := (set(array, i, ((get(array, (i - 1))) + (get(array, (i - 2)))))) goto {7}
+7: i := (i + 1) goto {8}
+8: if (0 == 0) then {4} else {}
+9: if (i >= n) then {10} else {}
+10: print(array) goto {11}
